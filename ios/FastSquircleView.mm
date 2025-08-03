@@ -41,11 +41,6 @@ using namespace facebook::react;
     const auto &oldViewProps = *std::static_pointer_cast<FastSquircleViewProps const>(_props);
     const auto &newViewProps = *std::static_pointer_cast<FastSquircleViewProps const>(props);
 
-    if (oldViewProps.color != newViewProps.color) {
-        NSString * colorToConvert = [[NSString alloc] initWithUTF8String: newViewProps.color.c_str()];
-        [_view setBackgroundColor:[self hexStringToColor:colorToConvert]];
-    }
-
     [super updateProps:props oldProps:oldProps];
 }
 
