@@ -12,6 +12,8 @@
 
 using namespace facebook::react;
 
+const CGFloat BACKGROUND_COLOR_ZPOSITION = -1024.0f;
+
 @interface RCTViewComponentView ()
 - (void)invalidateLayer;
 @end
@@ -22,7 +24,8 @@ using namespace facebook::react;
 
 @implementation FastSquircleView {
   UIView * _view;
-  ViewLayersUpdater * _viewLayersUpdater;
+  
+  CALayer * _squircleBackgroundLayer;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
@@ -39,8 +42,6 @@ using namespace facebook::react;
     _view = [[UIView alloc] init];
     
     self.contentView = _view;
-    
-    _viewLayersUpdater = [[ViewLayersUpdater alloc] init];
   }
   
   return self;
@@ -57,35 +58,61 @@ using namespace facebook::react;
 - (void)invalidateLayer
 {
   [super invalidateLayer];
-  
-  UpdateLayersParams *params = [[UpdateLayersParams alloc] initWithView:self];
-  
+    
   Ivar backgroundColorLayerIvar = class_getInstanceVariable([RCTViewComponentView class], "_backgroundColorLayer");
   CALayer *backgroundColorLayer = object_getIvar(self, backgroundColorLayerIvar);
   
-  params.backgroundColorLayer = backgroundColorLayer;
-  
-//  const auto &viewProps = *std::static_pointer_cast<FastSquircleViewProps const>(self.props);
-  
   const auto borderMetrics = _props->resolveBorderMetrics(_layoutMetrics);
   
-  if (borderMetrics.borderRadii.isUniform()) {
-    params.cornerRadius = [self toSingleValue:borderMetrics.borderRadii.topLeft];
-  } else {
-    params.topLeftCornerRadius = [self toSingleValue:borderMetrics.borderRadii.topLeft];
-    params.topRightCornerRadius = [self toSingleValue:borderMetrics.borderRadii.topRight];
-    params.bottomLeftCornerRadius = [self toSingleValue:borderMetrics.borderRadii.bottomLeft];
-    params.bottomRightCornerRadius = [self toSingleValue:borderMetrics.borderRadii.bottomRight];
-  }
-
-  params.cornerSmoothing = 0.6;
+  NSNumber *topLeftBorderRadius = [self toSingleValue:borderMetrics.borderRadii.topLeft];
+  NSNumber *topRightBorderRadius = [self toSingleValue:borderMetrics.borderRadii.topRight];
+  NSNumber *bottomLeftBorderRadius = [self toSingleValue:borderMetrics.borderRadii.bottomLeft];
+  NSNumber *bottomRightBorderRadius = [self toSingleValue:borderMetrics.borderRadii.bottomRight];
   
-  [_viewLayersUpdater updateLayersWithParams:params];
+  CGFloat width = self.frame.size.width;
+  CGFloat height = self.frame.size.height;
+  SquircleParams *squircleParams = [[SquircleParams alloc] initWithCornerSmoothing:@0.6 width:@(width) height:@(height)];
+  squircleParams.topLeftCornerRadius = topLeftBorderRadius;
+  squircleParams.topRightCornerRadius = topRightBorderRadius;
+  squircleParams.bottomLeftCornerRadius = bottomLeftBorderRadius;
+  squircleParams.bottomRightCornerRadius = bottomRightBorderRadius;
+  
+  UIBezierPath *squirclePath = [SquirclePathGenerator getSquirclePath:squircleParams];
+  
+  CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
+  maskLayer.path = squirclePath.CGPath;
+  
+  
+  // border
+  
+  // if the RN code already added a background dedicated layer it is easier to just mask it
+  if (backgroundColorLayer) {
+    if (_squircleBackgroundLayer) {
+      [_squircleBackgroundLayer removeFromSuperlayer];
+    }
+    
+    backgroundColorLayer.mask = maskLayer;
+  } else {
+    CGColor *originalBackgroundColor = self.layer.backgroundColor;
+    self.layer.backgroundColor = nil;
+    self.layer.cornerRadius = 0;
+    
+    if (!_squircleBackgroundLayer) {
+      _squircleBackgroundLayer = [[CALayer alloc] init];
+      _squircleBackgroundLayer.zPosition = BACKGROUND_COLOR_ZPOSITION;
+      [self.layer addSublayer:_squircleBackgroundLayer];
+    }
+    
+    _squircleBackgroundLayer.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.width);
+    _squircleBackgroundLayer.mask = maskLayer;
+    _squircleBackgroundLayer.backgroundColor = originalBackgroundColor;
+    [_squircleBackgroundLayer removeAllAnimations];
+  }
 }
 
--(float)toSingleValue:(CornerRadii)cornerRadii
+-(NSNumber *)toSingleValue:(CornerRadii)cornerRadii
 {
-  return fmax(cornerRadii.vertical, cornerRadii.horizontal);
+  return @(fmax(cornerRadii.vertical, cornerRadii.horizontal));
 }
 
 Class<RCTComponentViewProtocol> FastSquircleViewCls(void)

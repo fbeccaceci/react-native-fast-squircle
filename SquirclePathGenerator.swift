@@ -8,15 +8,22 @@
 
 import UIKit
 
-struct SquircleParams {
-  let cornerRadius: CGFloat?
-  let topLeftCornerRadius: CGFloat?
-  let topRightCornerRadius: CGFloat?
-  let bottomRightCornerRadius: CGFloat?
-  let bottomLeftCornerRadius: CGFloat?
-  let cornerSmoothing: CGFloat
-  let width: CGFloat
-  let height: CGFloat
+@objc
+class SquircleParams : NSObject {
+  @objc var cornerRadius: NSNumber?
+  @objc var topLeftCornerRadius: NSNumber?
+  @objc var topRightCornerRadius: NSNumber?
+  @objc var bottomRightCornerRadius: NSNumber?
+  @objc var bottomLeftCornerRadius: NSNumber?
+  @objc var cornerSmoothing: NSNumber
+  @objc var width: NSNumber
+  @objc var height: NSNumber
+  
+  @objc init(cornerSmoothing: NSNumber, width: NSNumber, height: NSNumber) {
+    self.cornerSmoothing = cornerSmoothing
+    self.width = width
+    self.height = height
+  }
 }
 
 struct CornerParams {
@@ -35,13 +42,24 @@ struct CornerPathParams {
   let arcSectionLength: CGFloat
 }
 
+@objc class SquirclePathGenerator : NSObject {
+  @objc static func getSquirclePath(_ params: SquircleParams) -> UIBezierPath {
+    return FastSquircle.getSquirclePath(params: params)
+  }
+}
+
 func getSquirclePath(params: SquircleParams) -> UIBezierPath {
-  let topLeftCornerRadius: CGFloat = params.topLeftCornerRadius ?? params.cornerRadius ?? 0
-  let topRightCornerRadius: CGFloat = params.topRightCornerRadius ?? params.cornerRadius ?? 0
-  let bottomLeftCornerRadius: CGFloat = params.bottomLeftCornerRadius ?? params.cornerRadius ?? 0
-  let bottomRightCornerRadius: CGFloat = params.bottomRightCornerRadius ?? params.cornerRadius ?? 0
+  let topLeftCornerRadius: CGFloat = CGFloat(truncating: params.topLeftCornerRadius ?? params.cornerRadius ?? 0)
+  let topRightCornerRadius: CGFloat = CGFloat(truncating: params.topRightCornerRadius ?? params.cornerRadius ?? 0)
+  let bottomLeftCornerRadius: CGFloat = CGFloat(truncating: params.bottomLeftCornerRadius ?? params.cornerRadius ?? 0)
+  let bottomRightCornerRadius: CGFloat = CGFloat(truncating: params.bottomRightCornerRadius ?? params.cornerRadius ?? 0)
   
-  let roundingAndSmoothingBudget = min(params.width, params.height) / 2
+  let cornerSmoothing = CGFloat(truncating: params.cornerSmoothing)
+  let width = CGFloat(truncating: params.width)
+  let height = CGFloat(truncating: params.height)
+  
+  let roundingAndSmoothingBudget = min(width, height) / 2
+  
   
   if (topLeftCornerRadius == topRightCornerRadius
       && topRightCornerRadius == bottomLeftCornerRadius
@@ -51,13 +69,13 @@ func getSquirclePath(params: SquircleParams) -> UIBezierPath {
    
     let pathParams = getPathParamsForCorner(params: CornerParams(
       cornerRadius: cornerRadius,
-      cornerSmoothing: params.cornerSmoothing,
+      cornerSmoothing: cornerSmoothing,
       roundingAndSmoothingBudget: roundingAndSmoothingBudget
     ))
     
     return getUIBezierPathFromPathParams(
-      width: params.width,
-      height: params.height,
+      width: width,
+      height: height,
       topLeftPathParams: pathParams,
       topRightPathParams: pathParams,
       bottomLeftPathParams: pathParams,
@@ -66,26 +84,26 @@ func getSquirclePath(params: SquircleParams) -> UIBezierPath {
   }
   
   return getUIBezierPathFromPathParams(
-    width: params.width,
-    height: params.height,
+    width: width,
+    height: height,
     topLeftPathParams: getPathParamsForCorner(params: CornerParams(
       cornerRadius: min(roundingAndSmoothingBudget, topLeftCornerRadius),
-      cornerSmoothing: params.cornerSmoothing,
+      cornerSmoothing: cornerSmoothing,
       roundingAndSmoothingBudget: roundingAndSmoothingBudget
     )),
     topRightPathParams: getPathParamsForCorner(params: CornerParams(
       cornerRadius: min(roundingAndSmoothingBudget, topRightCornerRadius),
-      cornerSmoothing: params.cornerSmoothing,
+      cornerSmoothing: cornerSmoothing,
       roundingAndSmoothingBudget: roundingAndSmoothingBudget
     )),
     bottomLeftPathParams: getPathParamsForCorner(params: CornerParams(
       cornerRadius: min(roundingAndSmoothingBudget, bottomLeftCornerRadius),
-      cornerSmoothing: params.cornerSmoothing,
+      cornerSmoothing: cornerSmoothing,
       roundingAndSmoothingBudget: roundingAndSmoothingBudget
     )),
     bottomRightPathParams: getPathParamsForCorner(params: CornerParams(
       cornerRadius: min(roundingAndSmoothingBudget, bottomRightCornerRadius),
-      cornerSmoothing: params.cornerSmoothing,
+      cornerSmoothing: cornerSmoothing,
       roundingAndSmoothingBudget: roundingAndSmoothingBudget
     )),
   )
