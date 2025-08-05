@@ -4,13 +4,16 @@ import { FastSquircleView } from 'react-native-fast-squircle';
 export default function App() {
   return (
     <View style={styles.container}>
-      <FastSquircleView style={styles.box}>
-        <View style={styles.innerBox} />
+      <FastSquircleView style={[styles.box]}>
+        {/* <View
+          style={{
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'white',
+            borderRadius: 36,
+          }}
+        /> */}
       </FastSquircleView>
-
-      <View style={styles.box}>
-        <View style={styles.innerBox} />
-      </View>
     </View>
   );
 }
@@ -26,11 +29,14 @@ const styles = StyleSheet.create({
     height: 200,
     marginVertical: 20,
 
-    backgroundColor: 'blue',
+    backgroundColor: '#DDDAD0',
 
     borderRadius: 40,
-    // borderTopLeftRadius: 20,
-    // borderTopRightRadius: 80,
+    // borderTopLeftRadius: 100,
+    // borderTopRightRadius: 100,
+
+    borderWidth: 1,
+    borderColor: '#dedecc',
   },
 
   innerBox: {

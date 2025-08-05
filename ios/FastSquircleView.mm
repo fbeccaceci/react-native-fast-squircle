@@ -9,10 +9,81 @@
 
 #import "FastSquircle-Swift.h"
 #import <objc/runtime.h>
+#import <React/RCTBorderDrawing.h>
+#import <React/RCTConversions.h>
+#import "FastSquircleBorderDrawing.h"
 
 using namespace facebook::react;
 
 const CGFloat BACKGROUND_COLOR_ZPOSITION = -1024.0f;
+
+static void UpdateContourEffectToSquircleToLayer(
+    CALayer *layer,
+    const RCTCornerRadii &cornerRadii,
+    const RCTBorderColors &contourColors,
+    const UIEdgeInsets &contourInsets,
+    const RCTBorderStyle &contourStyle)
+{
+  UIImage *image = FastSquircleGetBorderImage(
+      contourStyle, layer.bounds.size, cornerRadii, contourInsets, contourColors, [UIColor clearColor], NO);
+    
+  if (image == nil) {
+    layer.contents = nil;
+  } else {
+    CGSize imageSize = image.size;
+    UIEdgeInsets imageCapInsets = image.capInsets;
+    CGRect contentsCenter = CGRect{
+        CGPoint{imageCapInsets.left / imageSize.width, imageCapInsets.top / imageSize.height},
+        CGSize{(CGFloat)1.0 / imageSize.width, (CGFloat)1.0 / imageSize.height}};
+    layer.contents = (id)image.CGImage;
+    layer.contentsScale = image.scale;
+
+    BOOL isResizable = !UIEdgeInsetsEqualToEdgeInsets(image.capInsets, UIEdgeInsetsZero);
+    if (isResizable) {
+      layer.contentsCenter = contentsCenter;
+    } else {
+      layer.contentsCenter = CGRect{CGPoint{0.0, 0.0}, CGSize{1.0, 1.0}};
+    }
+  }
+
+  // If mutations are applied inside of Animation block, it may cause layer to be animated.
+  // To stop that, imperatively remove all animations from layer.
+  [layer removeAllAnimations];
+}
+
+static RCTCornerRadii RCTCornerRadiiFromBorderRadii(BorderRadii borderRadii)
+{
+  return RCTCornerRadii{
+      .topLeftHorizontal = (CGFloat)borderRadii.topLeft.horizontal,
+      .topLeftVertical = (CGFloat)borderRadii.topLeft.vertical,
+      .topRightHorizontal = (CGFloat)borderRadii.topRight.horizontal,
+      .topRightVertical = (CGFloat)borderRadii.topRight.vertical,
+      .bottomLeftHorizontal = (CGFloat)borderRadii.bottomLeft.horizontal,
+      .bottomLeftVertical = (CGFloat)borderRadii.bottomLeft.vertical,
+      .bottomRightHorizontal = (CGFloat)borderRadii.bottomRight.horizontal,
+      .bottomRightVertical = (CGFloat)borderRadii.bottomRight.vertical};
+}
+
+static RCTBorderColors RCTCreateRCTBorderColorsFromBorderColors(BorderColors borderColors)
+{
+  return RCTBorderColors{
+      .top = RCTUIColorFromSharedColor(borderColors.top),
+      .left = RCTUIColorFromSharedColor(borderColors.left),
+      .bottom = RCTUIColorFromSharedColor(borderColors.bottom),
+      .right = RCTUIColorFromSharedColor(borderColors.right)};
+}
+
+static RCTBorderStyle RCTBorderStyleFromBorderStyle(BorderStyle borderStyle)
+{
+  switch (borderStyle) {
+    case BorderStyle::Solid:
+      return RCTBorderStyleSolid;
+    case BorderStyle::Dotted:
+      return RCTBorderStyleDotted;
+    case BorderStyle::Dashed:
+      return RCTBorderStyleDashed;
+  }
+}
 
 @interface RCTViewComponentView ()
 - (void)invalidateLayer;
@@ -26,6 +97,7 @@ const CGFloat BACKGROUND_COLOR_ZPOSITION = -1024.0f;
   UIView * _view;
   
   CALayer * _squircleBackgroundLayer;
+  CALayer * _squircleBorderLayer;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
@@ -62,6 +134,9 @@ const CGFloat BACKGROUND_COLOR_ZPOSITION = -1024.0f;
   Ivar backgroundColorLayerIvar = class_getInstanceVariable([RCTViewComponentView class], "_backgroundColorLayer");
   CALayer *backgroundColorLayer = object_getIvar(self, backgroundColorLayerIvar);
   
+  Ivar borderLayerIvar = class_getInstanceVariable([RCTViewComponentView class], "_borderLayer");
+  CALayer *borderLayer = object_getIvar(self, borderLayerIvar);
+  
   const auto borderMetrics = _props->resolveBorderMetrics(_layoutMetrics);
   
   NSNumber *topLeftBorderRadius = [self toSingleValue:borderMetrics.borderRadii.topLeft];
@@ -82,16 +157,17 @@ const CGFloat BACKGROUND_COLOR_ZPOSITION = -1024.0f;
   CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
   maskLayer.path = squirclePath.CGPath;
   
-  
   // border
   
   // if the RN code already added a background dedicated layer it is easier to just mask it
   if (backgroundColorLayer) {
     if (_squircleBackgroundLayer) {
       [_squircleBackgroundLayer removeFromSuperlayer];
+      _squircleBackgroundLayer = nil;
     }
     
     backgroundColorLayer.mask = maskLayer;
+    [backgroundColorLayer removeAllAnimations];
   } else {
     CGColor *originalBackgroundColor = self.layer.backgroundColor;
     self.layer.backgroundColor = nil;
@@ -107,6 +183,43 @@ const CGFloat BACKGROUND_COLOR_ZPOSITION = -1024.0f;
     _squircleBackgroundLayer.mask = maskLayer;
     _squircleBackgroundLayer.backgroundColor = originalBackgroundColor;
     [_squircleBackgroundLayer removeAllAnimations];
+  }
+  
+  // border
+  if (borderLayer) {
+    if (_squircleBorderLayer) {
+      [_squircleBorderLayer removeFromSuperlayer];
+      _squircleBorderLayer = nil;
+    }
+    
+    UpdateContourEffectToSquircleToLayer(
+      borderLayer,
+      RCTCornerRadiiFromBorderRadii(borderMetrics.borderRadii),
+      RCTCreateRCTBorderColorsFromBorderColors(borderMetrics.borderColors),
+      RCTUIEdgeInsetsFromEdgeInsets(borderMetrics.borderWidths),
+      RCTBorderStyleFromBorderStyle(borderMetrics.borderStyles.left));
+  } else {
+    if (!_squircleBorderLayer) {
+      CALayer *borderLayer = [CALayer new];
+      borderLayer.zPosition = BACKGROUND_COLOR_ZPOSITION + 1;
+      borderLayer.frame = self.layer.bounds;
+      borderLayer.magnificationFilter = kCAFilterNearest;
+      [self.layer addSublayer:borderLayer];
+      _squircleBorderLayer = borderLayer;
+    }
+
+    self.layer.borderWidth = 0;
+    self.layer.borderColor = nil;
+    self.layer.cornerRadius = 0;
+
+    RCTBorderColors borderColors = RCTCreateRCTBorderColorsFromBorderColors(borderMetrics.borderColors);
+
+    UpdateContourEffectToSquircleToLayer(
+        _squircleBorderLayer,
+        RCTCornerRadiiFromBorderRadii(borderMetrics.borderRadii),
+        borderColors,
+        RCTUIEdgeInsetsFromEdgeInsets(borderMetrics.borderWidths),
+        RCTBorderStyleFromBorderStyle(borderMetrics.borderStyles.left));
   }
 }
 
