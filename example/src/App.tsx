@@ -5,8 +5,6 @@ export default function App() {
   return (
     <View style={styles.container}>
       <FastSquircleView style={[styles.box]} cornerSmoothing={1} />
-
-      <View style={[styles.box]} />
     </View>
   );
 }
@@ -31,10 +29,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#bfbfae',
 
-    outlineColor: 'red',
-    outlineWidth: 2,
-    outlineStyle: 'solid',
-    outlineOffset: 0,
+    boxShadow: '10px 10px 5px red',
   },
 
   innerBox: {

@@ -12,6 +12,7 @@
 #import <React/RCTConversions.h>
 #import "FastSquircleBorderDrawing.h"
 #import "FastSquircle-Swift.h"
+#import "FastSquircleBoxShadow.h"
 
 using namespace facebook::react;
 
@@ -174,6 +175,9 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
   Ivar outlineLayerIvar = class_getInstanceVariable([RCTViewComponentView class], "_outlineLayer");
   CALayer *outlineLayer = object_getIvar(self, outlineLayerIvar);
   
+  Ivar boxShadowLayerIvar = class_getInstanceVariable([RCTViewComponentView class], "_boxShadowLayer");
+  CALayer *boxShadowLayer = object_getIvar(self, boxShadowLayerIvar);
+  
   const auto borderMetrics = _props->resolveBorderMetrics(_layoutMetrics);
   
   NSNumber *topLeftBorderRadius = [self toSingleValue:borderMetrics.borderRadii.topLeft];
@@ -290,6 +294,17 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
         UIEdgeInsets{_props->outlineWidth, _props->outlineWidth, _props->outlineWidth, _props->outlineWidth},
         RCTBorderStyleFromOutlineStyle(_props->outlineStyle),
         cornerSmoothing);
+  }
+  
+  // box shadow
+  if (boxShadowLayer) {
+    UIImage *boxShadowImage = FastSquircleGetBoxShadowImage(_props->boxShadow,
+      RCTCornerRadiiFromBorderRadii(borderMetrics.borderRadii),
+      RCTUIEdgeInsetsFromEdgeInsets(borderMetrics.borderWidths),
+      self.layer.bounds.size,
+      cornerSmoothing);
+    
+    boxShadowLayer.contents = (id)boxShadowImage.CGImage;
   }
 }
 
