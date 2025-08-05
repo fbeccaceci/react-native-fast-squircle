@@ -88,6 +88,7 @@ static RCTBorderStyle RCTBorderStyleFromBorderStyle(BorderStyle borderStyle)
 
 @interface RCTViewComponentView ()
 - (void)invalidateLayer;
+- (UIView *)currentContainerView;
 @end
 
 @interface FastSquircleView () <RCTFastSquircleViewViewProtocol>
@@ -155,7 +156,6 @@ static RCTBorderStyle RCTBorderStyleFromBorderStyle(BorderStyle borderStyle)
   CGFloat width = self.frame.size.width;
   CGFloat height = self.frame.size.height;
   
-  const auto &viewProps = *std::static_pointer_cast<FastSquircleViewProps const>(self.props);
   NSNumber *cornerSmoothing = @(_cornerSmoothing);
   
   SquircleParams *squircleParams = [[SquircleParams alloc] initWithCornerSmoothing:cornerSmoothing width:@(width) height:@(height)];
@@ -234,6 +234,21 @@ static RCTBorderStyle RCTBorderStyleFromBorderStyle(BorderStyle borderStyle)
         RCTUIEdgeInsetsFromEdgeInsets(borderMetrics.borderWidths),
         RCTBorderStyleFromBorderStyle(borderMetrics.borderStyles.left),
         cornerSmoothing);
+  }
+  
+  // clipping
+  if (self.currentContainerView.clipsToBounds) {
+    squircleParams.width = @(squircleParams.width.floatValue - 2);
+    squircleParams.height = @(squircleParams.height.floatValue - 2);
+    squircleParams.cornerRadius = @(squircleParams.cornerRadius.floatValue - 1);
+    UIBezierPath *squirclePath = [SquirclePathGenerator getSquirclePath:squircleParams];
+    
+    CGAffineTransform translation = CGAffineTransformMakeTranslation(1, 1);
+    [squirclePath applyTransform:translation];
+    
+    CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
+    maskLayer.path = squirclePath.CGPath;
+    self.currentContainerView.layer.mask = maskLayer;
   }
 }
 
