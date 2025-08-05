@@ -1,10 +1,52 @@
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet, ScrollView, View } from 'react-native';
 import { FastSquircleView } from 'react-native-fast-squircle';
+import { SquircleView } from 'react-native-figma-squircle';
+
+const data = new Array(1000).fill(0).map((_, i) => ({
+  id: i,
+  title: `Item ${i + 1}`,
+}));
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <FastSquircleView style={[styles.box]} cornerSmoothing={1} />
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollableContainer}
+    >
+      {/* <FastSquircleViewRenderer /> */}
+      <SVGRenderer />
+    </ScrollView>
+  );
+}
+
+function FastSquircleViewRenderer() {
+  return (
+    <View style={styles.boxesContainer}>
+      {data.map((item) => (
+        <FastSquircleView
+          key={item.id}
+          style={styles.box}
+          cornerSmoothing={1}
+        />
+      ))}
+    </View>
+  );
+}
+
+function SVGRenderer() {
+  return (
+    <View style={styles.boxesContainer}>
+      {data.map((item) => (
+        <SquircleView
+          key={item.id}
+          style={styles.box}
+          squircleParams={{
+            cornerSmoothing: 1,
+            cornerRadius: 10,
+            fillColor: '#DDDAD0',
+          }}
+        />
+      ))}
     </View>
   );
 }
@@ -12,29 +54,25 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+  },
+
+  scrollableContainer: {
+    paddingVertical: 50,
+  },
+
+  boxesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'center',
   },
+
   box: {
-    width: 200,
-    height: 200,
-    marginVertical: 20,
+    width: 40,
+    height: 40,
+    margin: 10,
 
     backgroundColor: '#DDDAD0',
 
-    borderRadius: 40,
-    // borderTopLeftRadius: 100,
-    // borderTopRightRadius: 100,
-
-    borderWidth: 1,
-    borderColor: '#bfbfae',
-
-    boxShadow: '10px 10px 5px red',
-  },
-
-  innerBox: {
-    width: '100%',
-    height: '100%',
-    // backgroundColor: 'red',
+    borderRadius: 10,
   },
 });
