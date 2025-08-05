@@ -86,6 +86,31 @@ static RCTBorderStyle RCTBorderStyleFromBorderStyle(BorderStyle borderStyle)
   }
 }
 
+static RCTCornerRadii RCTCreateOutlineCornerRadiiFromBorderRadii(const BorderRadii &borderRadii, CGFloat outlineWidth, CGFloat outlineOffset)
+{
+  return RCTCornerRadii{
+      borderRadii.topLeft.horizontal != 0 ? borderRadii.topLeft.horizontal + outlineWidth + outlineOffset : 0,
+      borderRadii.topLeft.vertical != 0 ? borderRadii.topLeft.vertical + outlineWidth + outlineOffset : 0,
+      borderRadii.topRight.horizontal != 0 ? borderRadii.topRight.horizontal + outlineWidth + outlineOffset : 0,
+      borderRadii.topRight.vertical != 0 ? borderRadii.topRight.vertical + outlineWidth + outlineOffset : 0,
+      borderRadii.bottomLeft.horizontal != 0 ? borderRadii.bottomLeft.horizontal + outlineWidth + outlineOffset: 0,
+      borderRadii.bottomLeft.vertical != 0 ? borderRadii.bottomLeft.vertical + outlineWidth + outlineOffset: 0,
+      borderRadii.bottomRight.horizontal != 0 ? borderRadii.bottomRight.horizontal + outlineWidth + outlineOffset: 0,
+      borderRadii.bottomRight.vertical != 0 ? borderRadii.bottomRight.vertical + outlineWidth + outlineOffset: 0};
+}
+
+static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
+{
+  switch (outlineStyle) {
+    case OutlineStyle::Solid:
+      return RCTBorderStyleSolid;
+    case OutlineStyle::Dotted:
+      return RCTBorderStyleDotted;
+    case OutlineStyle::Dashed:
+      return RCTBorderStyleDashed;
+  }
+}
+
 @interface RCTViewComponentView ()
 - (void)invalidateLayer;
 - (UIView *)currentContainerView;
@@ -145,6 +170,9 @@ static RCTBorderStyle RCTBorderStyleFromBorderStyle(BorderStyle borderStyle)
   
   Ivar borderLayerIvar = class_getInstanceVariable([RCTViewComponentView class], "_borderLayer");
   CALayer *borderLayer = object_getIvar(self, borderLayerIvar);
+  
+  Ivar outlineLayerIvar = class_getInstanceVariable([RCTViewComponentView class], "_outlineLayer");
+  CALayer *outlineLayer = object_getIvar(self, outlineLayerIvar);
   
   const auto borderMetrics = _props->resolveBorderMetrics(_layoutMetrics);
   
@@ -249,6 +277,19 @@ static RCTBorderStyle RCTBorderStyleFromBorderStyle(BorderStyle borderStyle)
     CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
     maskLayer.path = squirclePath.CGPath;
     self.currentContainerView.layer.mask = maskLayer;
+  }
+  
+  // outline
+  if (outlineLayer) {
+    UIColor *outlineColor = RCTUIColorFromSharedColor(_props->outlineColor);
+    
+    UpdateContourEffectToSquircleToLayer(
+        outlineLayer,
+        RCTCreateOutlineCornerRadiiFromBorderRadii(borderMetrics.borderRadii, _props->outlineWidth, _props->outlineOffset),
+        RCTBorderColors{outlineColor, outlineColor, outlineColor, outlineColor},
+        UIEdgeInsets{_props->outlineWidth, _props->outlineWidth, _props->outlineWidth, _props->outlineWidth},
+        RCTBorderStyleFromOutlineStyle(_props->outlineStyle),
+        cornerSmoothing);
   }
 }
 

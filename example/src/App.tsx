@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     outlineColor: 'red',
     outlineWidth: 2,
     outlineStyle: 'solid',
-    outlineOffset: 2,
+    outlineOffset: 0,
   },
 
   innerBox: {
