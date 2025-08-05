@@ -9,17 +9,17 @@
 import UIKit
 
 @objc
-class SquircleParams : NSObject {
-  @objc var cornerRadius: NSNumber?
-  @objc var topLeftCornerRadius: NSNumber?
-  @objc var topRightCornerRadius: NSNumber?
-  @objc var bottomRightCornerRadius: NSNumber?
-  @objc var bottomLeftCornerRadius: NSNumber?
-  @objc var cornerSmoothing: NSNumber
-  @objc var width: NSNumber
-  @objc var height: NSNumber
+public class SquircleParams : NSObject {
+  @objc public var cornerRadius: NSNumber?
+  @objc public var topLeftCornerRadius: NSNumber?
+  @objc public var topRightCornerRadius: NSNumber?
+  @objc public var bottomRightCornerRadius: NSNumber?
+  @objc public var bottomLeftCornerRadius: NSNumber?
+  @objc public var cornerSmoothing: NSNumber
+  @objc public var width: NSNumber
+  @objc public var height: NSNumber
   
-  @objc init(cornerSmoothing: NSNumber, width: NSNumber, height: NSNumber) {
+  @objc public init(cornerSmoothing: NSNumber, width: NSNumber, height: NSNumber) {
     self.cornerSmoothing = cornerSmoothing
     self.width = width
     self.height = height
@@ -42,8 +42,8 @@ struct CornerPathParams {
   let arcSectionLength: CGFloat
 }
 
-@objc class SquirclePathGenerator : NSObject {
-  @objc static func getSquirclePath(_ params: SquircleParams) -> UIBezierPath {
+@objc public class SquirclePathGenerator : NSObject {
+  @objc public static func getSquirclePath(_ params: SquircleParams) -> UIBezierPath {
     return FastSquircle.getSquirclePath(params: params)
   }
 }

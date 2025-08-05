@@ -7,11 +7,11 @@
 
 #import "RCTFabricComponentsPlugins.h"
 
-#import "FastSquircle-Swift.h"
 #import <objc/runtime.h>
 #import <React/RCTBorderDrawing.h>
 #import <React/RCTConversions.h>
 #import "FastSquircleBorderDrawing.h"
+#import "FastSquircle-Swift.h"
 
 using namespace facebook::react;
 

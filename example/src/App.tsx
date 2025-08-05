@@ -4,7 +4,7 @@ import { FastSquircleView } from 'react-native-fast-squircle';
 export default function App() {
   return (
     <View style={styles.container}>
-      <FastSquircleView style={[styles.box]}>
+      <FastSquircleView style={[styles.box]} cornerSmoothing={0.6}>
         {/* <View
           style={{
             width: '100%',
