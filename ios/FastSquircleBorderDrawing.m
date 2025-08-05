@@ -44,7 +44,7 @@ RCTMakeUIGraphicsImageRenderer(CGSize size, UIColor *backgroundColor, BOOL hasCo
   return renderer;
 }
 
-static CGPathRef RCTPathCreateOuterOutline(BOOL drawToEdge, CGRect rect, RCTCornerRadii cornerRadii)
+static CGPathRef RCTPathCreateOuterOutline(BOOL drawToEdge, CGRect rect, RCTCornerRadii cornerRadii, NSNumber *cornerSmoothing)
 {
   if (drawToEdge) {
     return CGPathCreateWithRect(rect, NULL);
@@ -57,7 +57,7 @@ static CGPathRef RCTPathCreateOuterOutline(BOOL drawToEdge, CGRect rect, RCTCorn
   
   CGFloat width = rect.size.width;
   CGFloat height = rect.size.height;
-  SquircleParams *squircleParams = [[SquircleParams alloc] initWithCornerSmoothing:@0.6 width:@(width) height:@(height)];
+  SquircleParams *squircleParams = [[SquircleParams alloc] initWithCornerSmoothing:cornerSmoothing width:@(width) height:@(height)];
   squircleParams.topLeftCornerRadius = topLeftBorderRadius;
   squircleParams.topRightCornerRadius = topRightBorderRadius;
   squircleParams.bottomLeftCornerRadius = bottomLeftBorderRadius;
@@ -68,7 +68,7 @@ static CGPathRef RCTPathCreateOuterOutline(BOOL drawToEdge, CGRect rect, RCTCorn
   return CGPathCreateCopy(squirclePath.CGPath);
 }
 
-static CGPathRef PathCreateInnerOutline(CGRect rect, RCTCornerRadii cornerRadii, CGFloat insetAmount)
+static CGPathRef PathCreateInnerOutline(CGRect rect, RCTCornerRadii cornerRadii, CGFloat insetAmount, NSNumber *cornerSmoothing)
 {
   NSNumber *topLeftBorderRadius = @(fmax(fmax(cornerRadii.topLeftVertical, cornerRadii.topLeftHorizontal) - insetAmount, 0));
   NSNumber *topRightBorderRadius = @(fmax(fmax(cornerRadii.topRightVertical, cornerRadii.topRightHorizontal) - insetAmount, 0));
@@ -77,7 +77,7 @@ static CGPathRef PathCreateInnerOutline(CGRect rect, RCTCornerRadii cornerRadii,
   
   CGFloat width = rect.size.width;
   CGFloat height = rect.size.height;
-  SquircleParams *squircleParams = [[SquircleParams alloc] initWithCornerSmoothing:@0.6 width:@(width) height:@(height)];
+  SquircleParams *squircleParams = [[SquircleParams alloc] initWithCornerSmoothing:cornerSmoothing width:@(width) height:@(height)];
   squircleParams.topLeftCornerRadius = topLeftBorderRadius;
   squircleParams.topRightCornerRadius = topRightBorderRadius;
   squircleParams.bottomLeftCornerRadius = bottomLeftBorderRadius;
@@ -126,7 +126,8 @@ static UIImage *RCTGetSolidBorderImage(
     UIEdgeInsets borderInsets,
     RCTBorderColors borderColors,
     UIColor *backgroundColor,
-    BOOL drawToEdge)
+    BOOL drawToEdge,
+    NSNumber *cornerSmoothing)
 {
   const BOOL hasCornerRadii = RCTCornerRadiiAreAboveThreshold(cornerRadii);
   const RCTCornerInsets cornerInsets = RCTGetCornerInsets(cornerRadii, borderInsets);
@@ -160,7 +161,7 @@ static UIImage *RCTGetSolidBorderImage(
   UIImage *image = [imageRenderer imageWithActions:^(UIGraphicsImageRendererContext *_Nonnull rendererContext) {
     const CGContextRef context = rendererContext.CGContext;
     const CGRect rect = {.size = size};
-    CGPathRef path = RCTPathCreateOuterOutline(drawToEdge, rect, cornerRadii);
+    CGPathRef path = RCTPathCreateOuterOutline(drawToEdge, rect, cornerRadii, cornerSmoothing);
 
     if (backgroundColor) {
       CGContextSetFillColorWithColor(context, backgroundColor.CGColor);
@@ -172,7 +173,7 @@ static UIImage *RCTGetSolidBorderImage(
     CGPathRelease(path);
 
     CGRect adjustedRect = UIEdgeInsetsInsetRect(rect, borderInsets);
-    CGPathRef insetPath = PathCreateInnerOutline(adjustedRect, cornerRadii, borderInsets.left);
+    CGPathRef insetPath = PathCreateInnerOutline(adjustedRect, cornerRadii, borderInsets.left, cornerSmoothing);
 
     CGContextAddPath(context, insetPath);
     CGContextEOClip(context);
@@ -331,11 +332,12 @@ UIImage *FastSquircleGetBorderImage(
   UIEdgeInsets borderInsets,
   RCTBorderColors borderColors,
   UIColor *backgroundColor,
-  BOOL drawToEdge)
+  BOOL drawToEdge,
+  NSNumber *cornerSmoothing)
 {
   switch (borderStyle) {
     case RCTBorderStyleSolid:
-      return RCTGetSolidBorderImage(cornerRadii, viewSize, borderInsets, borderColors, backgroundColor, drawToEdge);
+      return RCTGetSolidBorderImage(cornerRadii, viewSize, borderInsets, borderColors, backgroundColor, drawToEdge, cornerSmoothing);
 //    case RCTBorderStyleDashed:
 //    case RCTBorderStyleDotted:
 //      return RCTGetDashedOrDottedBorderImage(

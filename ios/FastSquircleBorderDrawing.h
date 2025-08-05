@@ -21,6 +21,7 @@ RCT_EXTERN UIImage *FastSquircleGetBorderImage(
   UIEdgeInsets borderInsets,
   RCTBorderColors borderColors,
   UIColor *backgroundColor,
-  BOOL drawToEdge);
+  BOOL drawToEdge,
+  NSNumber *cornerSmoothing);
 
 #endif /* FastSquircleBorderDrawing_h */

@@ -22,10 +22,11 @@ static void UpdateContourEffectToSquircleToLayer(
     const RCTCornerRadii &cornerRadii,
     const RCTBorderColors &contourColors,
     const UIEdgeInsets &contourInsets,
-    const RCTBorderStyle &contourStyle)
+    const RCTBorderStyle &contourStyle,
+    NSNumber *cornerSmoothing)
 {
   UIImage *image = FastSquircleGetBorderImage(
-      contourStyle, layer.bounds.size, cornerRadii, contourInsets, contourColors, [UIColor clearColor], NO);
+      contourStyle, layer.bounds.size, cornerRadii, contourInsets, contourColors, [UIColor clearColor], NO, cornerSmoothing);
     
   if (image == nil) {
     layer.contents = nil;
@@ -98,6 +99,8 @@ static RCTBorderStyle RCTBorderStyleFromBorderStyle(BorderStyle borderStyle)
   
   CALayer * _squircleBackgroundLayer;
   CALayer * _squircleBorderLayer;
+  
+  float _cornerSmoothing;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
@@ -121,8 +124,13 @@ static RCTBorderStyle RCTBorderStyleFromBorderStyle(BorderStyle borderStyle)
 
 - (void)updateProps:(Props::Shared const &)props oldProps:(Props::Shared const &)oldProps
 {
-  //    const auto &oldViewProps = *std::static_pointer_cast<FastSquircleViewProps const>(_props);
-  //    const auto &newViewProps = *std::static_pointer_cast<FastSquircleViewProps const>(props);
+  const auto &oldViewProps = *std::static_pointer_cast<FastSquircleViewProps const>(_props);
+  const auto &newViewProps = *std::static_pointer_cast<FastSquircleViewProps const>(props);
+  
+  if (oldViewProps.cornerSmoothing != newViewProps.cornerSmoothing) {
+    _cornerSmoothing = newViewProps.cornerSmoothing;
+    [self invalidateLayer];
+  }
   
   [super updateProps:props oldProps:oldProps];
 }
@@ -146,7 +154,11 @@ static RCTBorderStyle RCTBorderStyleFromBorderStyle(BorderStyle borderStyle)
   
   CGFloat width = self.frame.size.width;
   CGFloat height = self.frame.size.height;
-  SquircleParams *squircleParams = [[SquircleParams alloc] initWithCornerSmoothing:@0.6 width:@(width) height:@(height)];
+  
+  const auto &viewProps = *std::static_pointer_cast<FastSquircleViewProps const>(self.props);
+  NSNumber *cornerSmoothing = @(_cornerSmoothing);
+  
+  SquircleParams *squircleParams = [[SquircleParams alloc] initWithCornerSmoothing:cornerSmoothing width:@(width) height:@(height)];
   squircleParams.topLeftCornerRadius = topLeftBorderRadius;
   squircleParams.topRightCornerRadius = topRightBorderRadius;
   squircleParams.bottomLeftCornerRadius = bottomLeftBorderRadius;
@@ -197,7 +209,8 @@ static RCTBorderStyle RCTBorderStyleFromBorderStyle(BorderStyle borderStyle)
       RCTCornerRadiiFromBorderRadii(borderMetrics.borderRadii),
       RCTCreateRCTBorderColorsFromBorderColors(borderMetrics.borderColors),
       RCTUIEdgeInsetsFromEdgeInsets(borderMetrics.borderWidths),
-      RCTBorderStyleFromBorderStyle(borderMetrics.borderStyles.left));
+      RCTBorderStyleFromBorderStyle(borderMetrics.borderStyles.left),
+      cornerSmoothing);
   } else {
     if (!_squircleBorderLayer) {
       CALayer *borderLayer = [CALayer new];
@@ -219,7 +232,8 @@ static RCTBorderStyle RCTBorderStyleFromBorderStyle(BorderStyle borderStyle)
         RCTCornerRadiiFromBorderRadii(borderMetrics.borderRadii),
         borderColors,
         RCTUIEdgeInsetsFromEdgeInsets(borderMetrics.borderWidths),
-        RCTBorderStyleFromBorderStyle(borderMetrics.borderStyles.left));
+        RCTBorderStyleFromBorderStyle(borderMetrics.borderStyles.left),
+        cornerSmoothing);
   }
 }
 
