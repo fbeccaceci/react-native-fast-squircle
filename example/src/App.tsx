@@ -21,7 +21,9 @@ export default function App() {
   return (
     <View style={styles.container}>
       <SquircleView style={styles.box} ref={ref}>
-        {/* <View style={{ width: 50, aspectRatio: 1, backgroundColor: 'blue' }} /> */}
+        <View
+          style={{ width: '100%', height: '100%', backgroundColor: 'blue' }}
+        />
       </SquircleView>
 
       <View style={styles.box} />
@@ -45,10 +47,14 @@ const styles = StyleSheet.create({
     borderColor: '#c2bfb6',
 
     borderRadius: 30,
-    borderWidth: 1,
+    borderWidth: 10,
+
+    borderTopLeftRadius: 50,
 
     boxShadow: '10px 5px 5px teal',
+    overflow: 'hidden',
 
-    // overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -270,12 +270,18 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
   
   // clipping
   if (self.currentContainerView.clipsToBounds) {
-    squircleParams.width = @(squircleParams.width.floatValue - 2);
-    squircleParams.height = @(squircleParams.height.floatValue - 2);
-    squircleParams.cornerRadius = @(squircleParams.cornerRadius.floatValue - 1);
+    float borderWidth = borderMetrics.borderWidths.left;
+    squircleParams.width = @(squircleParams.width.floatValue - 2 * borderWidth);
+    squircleParams.height = @(squircleParams.height.floatValue - 2 * borderWidth);
+    
+    squircleParams.cornerRadius = @(fmax(0, squircleParams.cornerRadius.floatValue - borderWidth));
+    squircleParams.topLeftCornerRadius = @(fmax(0, squircleParams.topLeftCornerRadius.floatValue - borderWidth));
+    squircleParams.topRightCornerRadius = @(fmax(0, squircleParams.topRightCornerRadius.floatValue - borderWidth));
+    squircleParams.bottomLeftCornerRadius = @(fmax(0, squircleParams.bottomLeftCornerRadius.floatValue - borderWidth));
+    squircleParams.bottomRightCornerRadius = @(fmax(0, squircleParams.bottomRightCornerRadius.floatValue - borderWidth));
     UIBezierPath *squirclePath = [SquirclePathGenerator getSquirclePath:squircleParams];
     
-    CGAffineTransform translation = CGAffineTransformMakeTranslation(1, 1);
+    CGAffineTransform translation = CGAffineTransformMakeTranslation(borderWidth, borderWidth);
     [squirclePath applyTransform:translation];
     
     CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
