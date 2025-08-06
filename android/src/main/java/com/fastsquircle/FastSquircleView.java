@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 
 import com.facebook.react.common.annotations.UnstableReactNativeAPI;
+import com.facebook.react.uimanager.drawable.CSSBackgroundDrawable;
 import com.facebook.react.uimanager.drawable.CompositeBackgroundDrawable;
 import com.facebook.react.uimanager.drawable.OutsetBoxShadowDrawable;
 import com.facebook.react.views.view.ReactViewGroup;
@@ -29,7 +30,7 @@ public class FastSquircleView extends ReactViewGroup {
       getContext(),
       getBackground(),
       Collections.emptyList(),
-      new SquircleCSSBackgroundDrawable(getContext()),
+      new SquircleCSSBackgroundDrawable(getContext(), 0),
       null,
       null,
       null,
@@ -74,5 +75,23 @@ public class FastSquircleView extends ReactViewGroup {
     System.out.println("Running inside the draw method");
 
     super.draw(canvas);
+  }
+
+  @OptIn(markerClass = UnstableReactNativeAPI.class)
+  public void setCornerSmoothing(float cornerSmoothing) {
+    var background = getBackground();
+    if (!(background instanceof CompositeBackgroundDrawable compositeBackground)) {
+      return;
+    }
+
+    CSSBackgroundDrawable cssBackground = compositeBackground.getCssBackground();
+
+    if (!(cssBackground instanceof SquircleCSSBackgroundDrawable squircleCssBackground)) {
+      return;
+    }
+
+    squircleCssBackground.setCornerSmoothing(cornerSmoothing);
+    invalidate();
+    invalidateOutline();
   }
 }

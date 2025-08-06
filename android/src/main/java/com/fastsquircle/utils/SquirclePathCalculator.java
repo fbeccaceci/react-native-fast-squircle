@@ -9,9 +9,9 @@ import com.facebook.react.uimanager.style.ComputedBorderRadius;
 import com.facebook.react.uimanager.style.CornerRadii;
 
 public class SquirclePathCalculator {
-  private static final float CORNER_SMOOTHING = 0.6f;
+//  private static final float CORNER_SMOOTHING = 0.6f;
 
-  public static Path getPath(ComputedBorderRadius computedBorderRadius, float w, float h) {
+  public static Path getPath(ComputedBorderRadius computedBorderRadius, float w, float h, float cornerSmoothing) {
     float minSize = Math.min(w, h);
     float roundingAndSmoothingBudget = minSize / 2f;
 
@@ -20,10 +20,10 @@ public class SquirclePathCalculator {
     float bottomLeftRadius = getEffectiveRequestedBorderRadius(computedBorderRadius.getBottomLeft(), w, h);
     float bottomRightRadius = getEffectiveRequestedBorderRadius(computedBorderRadius.getBottomRight(), w, h);
 
-    CornerParams topLeft = getPathParamsForCorner(topLeftRadius, roundingAndSmoothingBudget);
-    CornerParams topRight = getPathParamsForCorner(topRightRadius, roundingAndSmoothingBudget);;
-    CornerParams bottomLeft = getPathParamsForCorner(bottomLeftRadius, roundingAndSmoothingBudget);;
-    CornerParams bottomRight = getPathParamsForCorner(bottomRightRadius, roundingAndSmoothingBudget);;
+    CornerParams topLeft = getPathParamsForCorner(topLeftRadius, roundingAndSmoothingBudget, cornerSmoothing);
+    CornerParams topRight = getPathParamsForCorner(topRightRadius, roundingAndSmoothingBudget, cornerSmoothing);
+    CornerParams bottomLeft = getPathParamsForCorner(bottomLeftRadius, roundingAndSmoothingBudget, cornerSmoothing);
+    CornerParams bottomRight = getPathParamsForCorner(bottomRightRadius, roundingAndSmoothingBudget, cornerSmoothing);
 
     return getSVGPathFromPathParams(w, h, topLeft, topRight, bottomLeft, bottomRight);
   }
@@ -40,11 +40,11 @@ public class SquirclePathCalculator {
     );
   }
 
-  private static CornerParams getPathParamsForCorner(float cornerRadius, float budget) {
-    float p = (1 + CORNER_SMOOTHING) * cornerRadius;
+  private static CornerParams getPathParamsForCorner(float cornerRadius, float budget, float targetCornerSmoothing) {
+    float p = (1 + targetCornerSmoothing) * cornerRadius;
 
     float maxCornerSmoothing = budget / cornerRadius - 1;
-    float cornerSmoothing = Math.min(CORNER_SMOOTHING, maxCornerSmoothing);
+    float cornerSmoothing = Math.min(targetCornerSmoothing, maxCornerSmoothing);
     p = Math.min(p, budget);
 
     float arcMeasure = 90 * (1 - cornerSmoothing);

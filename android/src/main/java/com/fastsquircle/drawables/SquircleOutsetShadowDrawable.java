@@ -55,7 +55,8 @@ public class SquircleOutsetShadowDrawable extends Drawable {
     var squirclePath = SquirclePathCalculator.getPath(
       computedBorderRadius,
       shadowRect.width(),
-      shadowRect.height()
+      shadowRect.height(),
+      0
     );
     squirclePath.offset(PixelUtil.toPixelFromDIP(getOffsetX()), PixelUtil.toPixelFromDIP(getOffsetY()));
 

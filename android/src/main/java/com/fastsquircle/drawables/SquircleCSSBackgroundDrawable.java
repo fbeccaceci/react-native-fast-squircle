@@ -109,9 +109,12 @@ public class SquircleCSSBackgroundDrawable extends CSSBackgroundDrawable {
   // Should be removed after migrating to Android layout direction.
   private int mLayoutDirectionOverride = -1;
 
-  public SquircleCSSBackgroundDrawable(Context context) {
+  private float mCornerSmoothing;
+
+  public SquircleCSSBackgroundDrawable(Context context, float cornerSmoothing) {
     super(context);
     mContext = context;
+    mCornerSmoothing = cornerSmoothing;
   }
 
   @Override
@@ -432,7 +435,8 @@ public class SquircleCSSBackgroundDrawable extends CSSBackgroundDrawable {
     var squirclePath = SquirclePathCalculator.getPath(
       mComputedBorderRadius,
       getBounds().width() + leftSizeIncrease + rightSizeIncrease - (borderWidth.left + borderWidth.right),
-      getBounds().height() + topSizeIncrease + bottomSizeIncrease - (borderWidth.top + borderWidth.bottom)
+      getBounds().height() + topSizeIncrease + bottomSizeIncrease - (borderWidth.top + borderWidth.bottom),
+      mCornerSmoothing
     );
 
     var horizontalOffset = borderWidth.left;
@@ -488,7 +492,8 @@ public class SquircleCSSBackgroundDrawable extends CSSBackgroundDrawable {
     mPathForBorderRadiusOutline.set(SquirclePathCalculator.getPath(
       mPathForBorderRadiusOutlineRadius,
       mTempRectForBorderRadiusOutline.width(),
-      mTempRectForBorderRadiusOutline.height()
+      mTempRectForBorderRadiusOutline.height(),
+      mCornerSmoothing
     ));
 
     var mCenterDrawPathRadius = new ComputedBorderRadius(
@@ -528,7 +533,8 @@ public class SquircleCSSBackgroundDrawable extends CSSBackgroundDrawable {
     mCenterDrawPath.set(SquirclePathCalculator.getPath(
       mCenterDrawPathRadius,
       mTempRectForCenterDrawPath.width(),
-      mTempRectForCenterDrawPath.height()
+      mTempRectForCenterDrawPath.height(),
+      mCornerSmoothing
     ));
     mCenterDrawPath.offset(
       borderWidth.left * 0.5f,
@@ -1119,6 +1125,13 @@ public class SquircleCSSBackgroundDrawable extends CSSBackgroundDrawable {
     int colorAlpha = color >>> 24;
     int multipliedAlpha = colorAlpha * alpha >> 8;
     return (multipliedAlpha << 24) | (color & 0x00FFFFFF);
+  }
+
+  public void setCornerSmoothing(float cornerSmoothing) {
+    mCornerSmoothing = cornerSmoothing;
+    mNeedUpdatePathForBorderRadius = true;
+    updatePath();
+    invalidateSelf();
   }
 
 }
