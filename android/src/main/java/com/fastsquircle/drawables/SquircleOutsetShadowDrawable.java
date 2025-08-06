@@ -45,7 +45,13 @@ public class SquircleOutsetShadowDrawable extends Drawable {
 
     var saveCount = canvas.save();
 
-    var computedBorderRadius = base.getBorderRadius().resolve(
+    var borderRadius = base.getBorderRadius();
+    if (borderRadius == null) {
+      canvas.restoreToCount(saveCount);
+      return;
+    }
+
+    var computedBorderRadius = borderRadius.resolve(
       getLayoutDirection(),
       getContext(),
       getBounds().width(),
@@ -101,8 +107,6 @@ public class SquircleOutsetShadowDrawable extends Drawable {
   public int getOpacity() {
     return base.getOpacity();
   }
-
-
 
   public static Object getVariableWithReflection(String fieldName, Object obj) {
     try {

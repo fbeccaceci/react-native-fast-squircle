@@ -16,6 +16,7 @@ import com.facebook.react.uimanager.drawable.OutsetBoxShadowDrawable;
 import com.facebook.react.views.view.ReactViewGroup;
 import com.fastsquircle.drawables.SquircleCSSBackgroundDrawable;
 import com.fastsquircle.drawables.SquircleOutsetShadowDrawable;
+import com.fastsquircle.utils.SquirclePathCalculator;
 
 import java.util.Collections;
 import java.util.stream.Collectors;
@@ -93,5 +94,38 @@ public class FastSquircleView extends ReactViewGroup {
     squircleCssBackground.setCornerSmoothing(cornerSmoothing);
     invalidate();
     invalidateOutline();
+  }
+
+  @OptIn(markerClass = UnstableReactNativeAPI.class)
+  @Override
+  protected void dispatchDraw(Canvas canvas) {
+    var background = getBackground();
+    if (!(background instanceof CompositeBackgroundDrawable compositeBackground)) {
+      super.dispatchDraw(canvas);
+      return;
+    }
+
+    CSSBackgroundDrawable cssBackground = compositeBackground.getCssBackground();
+
+    if (!(cssBackground instanceof SquircleCSSBackgroundDrawable squircleCssBackground)) {
+      super.dispatchDraw(canvas);
+      return;
+    }
+
+    var borderRadius = squircleCssBackground.getComputedBorderRadiusBorderRadius();
+    var borderWidth = squircleCssBackground.getDirectionAwareBorderInsets();
+    var cornerSmoothing = squircleCssBackground.getCornerSmoothing();
+
+    var squirclePath = SquirclePathCalculator.getPath(
+      borderRadius,
+      squircleCssBackground.getBounds().width() - (borderWidth.left + borderWidth.right),
+      squircleCssBackground.getBounds().height() - (borderWidth.top + borderWidth.bottom),
+      cornerSmoothing
+    );
+
+    squirclePath.offset(borderWidth.left, borderWidth.top);
+    canvas.clipPath(squirclePath);
+
+    super.dispatchDraw(canvas);
   }
 }

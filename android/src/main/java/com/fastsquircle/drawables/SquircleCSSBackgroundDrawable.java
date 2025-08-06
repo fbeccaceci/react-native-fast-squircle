@@ -1134,4 +1134,12 @@ public class SquircleCSSBackgroundDrawable extends CSSBackgroundDrawable {
     invalidateSelf();
   }
 
+  public ComputedBorderRadius getComputedBorderRadiusBorderRadius() {
+    return mComputedBorderRadius;
+  }
+
+  public float getCornerSmoothing() {
+    return mCornerSmoothing;
+  }
+
 }
