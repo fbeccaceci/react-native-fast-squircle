@@ -13,6 +13,7 @@ import com.facebook.react.common.annotations.UnstableReactNativeAPI;
 import com.facebook.react.uimanager.drawable.CSSBackgroundDrawable;
 import com.facebook.react.uimanager.drawable.CompositeBackgroundDrawable;
 import com.facebook.react.uimanager.drawable.OutsetBoxShadowDrawable;
+import com.facebook.react.uimanager.style.Overflow;
 import com.facebook.react.views.view.ReactViewGroup;
 import com.fastsquircle.drawables.SquircleCSSBackgroundDrawable;
 import com.fastsquircle.drawables.SquircleOutsetShadowDrawable;
@@ -99,6 +100,18 @@ public class FastSquircleView extends ReactViewGroup {
   @OptIn(markerClass = UnstableReactNativeAPI.class)
   @Override
   protected void dispatchDraw(Canvas canvas) {
+    var overflowString = getOverflow();
+    if (overflowString == null) {
+      super.dispatchDraw(canvas);
+      return;
+    }
+
+    var overflow = Overflow.fromString(overflowString);
+    if (overflow == Overflow.VISIBLE) {
+      super.dispatchDraw(canvas);
+      return;
+    }
+
     var background = getBackground();
     if (!(background instanceof CompositeBackgroundDrawable compositeBackground)) {
       super.dispatchDraw(canvas);
