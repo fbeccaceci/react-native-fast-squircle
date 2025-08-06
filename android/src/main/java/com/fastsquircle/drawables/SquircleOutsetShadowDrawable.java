@@ -2,6 +2,7 @@ package com.fastsquircle.drawables;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.RectF;
@@ -21,75 +22,85 @@ import java.lang.reflect.Field;
 @RequiresApi(api = Build.VERSION_CODES.P)
 public class SquircleOutsetShadowDrawable extends Drawable {
 
-    private final OutsetBoxShadowDrawable base;
+  private final OutsetBoxShadowDrawable base;
 
-    public SquircleOutsetShadowDrawable(OutsetBoxShadowDrawable base) {
-        this.base = base;
-    }
+  public SquircleOutsetShadowDrawable(OutsetBoxShadowDrawable base) {
+    this.base = base;
 
-    @Override
-    public void draw(@NonNull Canvas canvas) {
-        var spreadExtent = PixelUtil.toPixelFromDIP(getSpread());
-        var shadowRect = new RectF(getBounds());
-        shadowRect.inset(-spreadExtent, -spreadExtent);
-        shadowRect.offset(PixelUtil.toPixelFromDIP(getOffsetX()), PixelUtil.toPixelFromDIP(getOffsetY()));
+    var color = getShadowPaint().getColor();
 
-        var saveCount = canvas.save();
+    int r = Color.red(color);
+    int g = Color.green(color);
+    int b = Color.blue(color);
 
-        var computedBorderRadius = base.getBorderRadius().resolve(
-          getLayoutDirection(),
-          getContext(),
-          getBounds().width(),
-          getBounds().height()
-        );
+    System.out.println(String.format("Creating SquircleOutsetShadowDrawable with color: (%d, %d, %d)", r, g, b));
+  }
 
-        var squirclePath = SquirclePathCalculator.getPath(
-                computedBorderRadius,
-                shadowRect.width(),
-                shadowRect.height()
-        );
-        squirclePath.offset(PixelUtil.toPixelFromDIP(getOffsetX()), PixelUtil.toPixelFromDIP(getOffsetY()));
+  @Override
+  public void draw(@NonNull Canvas canvas) {
+    var spreadExtent = PixelUtil.toPixelFromDIP(getSpread());
+    var shadowRect = new RectF(getBounds());
+    shadowRect.inset(-spreadExtent, -spreadExtent);
+    shadowRect.offset(PixelUtil.toPixelFromDIP(getOffsetX()), PixelUtil.toPixelFromDIP(getOffsetY()));
 
-        canvas.drawPath(squirclePath, getShadowPaint());
+    var saveCount = canvas.save();
 
-        canvas.restoreToCount(saveCount);
-    }
+    var computedBorderRadius = base.getBorderRadius().resolve(
+      getLayoutDirection(),
+      getContext(),
+      getBounds().width(),
+      getBounds().height()
+    );
 
-    private Context getContext() {
-      return (Context) getVariableWithReflection("context", this.base);
-    }
+    var squirclePath = SquirclePathCalculator.getPath(
+      computedBorderRadius,
+      shadowRect.width(),
+      shadowRect.height()
+    );
+    squirclePath.offset(PixelUtil.toPixelFromDIP(getOffsetX()), PixelUtil.toPixelFromDIP(getOffsetY()));
 
-    private float getSpread() {
-        return (float) getVariableWithReflection("spread", this.base);
-    }
+    var shadowPaint = getShadowPaint();
+    canvas.drawPath(squirclePath, shadowPaint);
 
-    private float getOffsetX() {
-        return (float) getVariableWithReflection("offsetX", this.base);
-    }
+    canvas.restoreToCount(saveCount);
+  }
 
-    private float getOffsetY() {
-        return (float) getVariableWithReflection("offsetY", this.base);
-    }
+  private Context getContext() {
+    return (Context) getVariableWithReflection("context", this.base);
+  }
 
-    private Paint getShadowPaint() {
-        return (Paint) getVariableWithReflection("shadowPaint", this.base);
-    }
+  private float getSpread() {
+    return (float) getVariableWithReflection("spread", this.base);
+  }
 
-    @Override
-    public void setAlpha(int alpha) {
-        base.setAlpha(alpha);
-    }
+  private float getOffsetX() {
+    return (float) getVariableWithReflection("offsetX", this.base);
+  }
 
-    @Override
-    public void setColorFilter(@Nullable ColorFilter colorFilter) {
-        base.setColorFilter(colorFilter);
-        invalidateSelf();
-    }
+  private float getOffsetY() {
+    return (float) getVariableWithReflection("offsetY", this.base);
+  }
 
-    @Override
-    public int getOpacity() {
-        return base.getOpacity();
-    }
+  private Paint getShadowPaint() {
+    return (Paint) getVariableWithReflection("shadowPaint", this.base);
+  }
+
+  @Override
+  public void setAlpha(int alpha) {
+    base.setAlpha(alpha);
+  }
+
+  @Override
+  public void setColorFilter(@Nullable ColorFilter colorFilter) {
+    base.setColorFilter(colorFilter);
+    invalidateSelf();
+  }
+
+  @Override
+  public int getOpacity() {
+    return base.getOpacity();
+  }
+
 
 
   public static Object getVariableWithReflection(String fieldName, Object obj) {

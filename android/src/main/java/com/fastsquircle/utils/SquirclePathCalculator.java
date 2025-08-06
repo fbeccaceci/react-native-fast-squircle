@@ -9,7 +9,7 @@ import com.facebook.react.uimanager.style.ComputedBorderRadius;
 import com.facebook.react.uimanager.style.CornerRadii;
 
 public class SquirclePathCalculator {
-  private static final float CORNER_SMOOTHING = 0.8f;
+  private static final float CORNER_SMOOTHING = 0.6f;
 
   public static Path getPath(ComputedBorderRadius computedBorderRadius, float w, float h) {
     float minSize = Math.min(w, h);

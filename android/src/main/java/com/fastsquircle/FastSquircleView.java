@@ -2,6 +2,7 @@ package com.fastsquircle;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
@@ -40,31 +41,38 @@ public class FastSquircleView extends ReactViewGroup {
   }
 
   @Override
-  public void draw(@NonNull Canvas canvas) {
+  public void setBackground(Drawable background) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-      super.draw(canvas);
-      return;
-    }
-    var originalBackground = getBackground();
-    if (!(originalBackground instanceof CompositeBackgroundDrawable compositeBackground)) {
-      super.draw(canvas);
+      super.setBackground(background);
       return;
     }
 
+    if (!(background instanceof CompositeBackgroundDrawable compositeBackground)) {
+      super.setBackground(background);
+      return;
+    }
     if (compositeBackground.getOuterShadows().isEmpty()) {
-      super.draw(canvas);
+      super.setBackground(background);
       return;
     }
 
     var enhancedOutsetShadows = compositeBackground.getOuterShadows().stream().map(s -> {
-      if (s instanceof OutsetBoxShadowDrawable) return new SquircleOutsetShadowDrawable((OutsetBoxShadowDrawable) s);
+      if (s instanceof OutsetBoxShadowDrawable) {
+        return new SquircleOutsetShadowDrawable((OutsetBoxShadowDrawable) s);
+      }
+
       return s;
     }).collect(Collectors.toList());
 
     var newBackground = compositeBackground.withNewShadows(enhancedOutsetShadows, compositeBackground.getInnerShadows());
-    setBackground(newBackground);
-    super.draw(canvas);
-    setBackground(originalBackground);
+
+    super.setBackground(newBackground);
   }
 
+  @Override
+  public void draw(@NonNull Canvas canvas) {
+    System.out.println("Running inside the draw method");
+
+    super.draw(canvas);
+  }
 }

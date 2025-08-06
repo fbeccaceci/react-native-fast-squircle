@@ -4,7 +4,9 @@ import { FastSquircleView } from 'react-native-fast-squircle';
 export default function App() {
   return (
     <View style={styles.container}>
-      <FastSquircleView style={styles.box} cornerSmoothing={1} />
+      <FastSquircleView style={styles.box} cornerSmoothing={1}>
+        {/* <View style={{ width: 50, aspectRatio: 1, backgroundColor: 'blue' }} /> */}
+      </FastSquircleView>
     </View>
   );
 }
@@ -24,9 +26,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#DDDAD0',
     borderColor: '#c2bfb6',
 
-    borderRadius: 40,
+    borderRadius: 30,
     borderWidth: 1,
 
-    boxShadow: '10px 5px 5px red',
+    boxShadow: '10px 5px 5px purple',
+
+    // overflow: 'hidden',
   },
 });
