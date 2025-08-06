@@ -140,7 +140,7 @@ fileprivate func getUIBezierPathFromPathParams(
   topLeftPathParams: CornerPathParams,
   topRightPathParams: CornerPathParams,
   bottomLeftPathParams: CornerPathParams,
-  bottomRightPathParams: CornerPathParams,
+  bottomRightPathParams: CornerPathParams
 ) -> UIBezierPath {
   let path = UIBezierPath()
   let containerSize = CGSize(width: width, height: height)
