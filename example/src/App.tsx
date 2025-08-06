@@ -1,12 +1,30 @@
-import { StyleSheet, View } from 'react-native';
-import { FastSquircleView } from 'react-native-fast-squircle';
+import { useEffect, useRef } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
+import SquircleView from 'react-native-fast-squircle';
 
 export default function App() {
+  const ref = useRef<View>(null);
+
+  useEffect(() => {
+    ref.current?.measure((x, y, width, height, pageX, pageY) => {
+      console.log(`${Platform.OS} Measured:`, {
+        x,
+        y,
+        width,
+        height,
+        pageX,
+        pageY,
+      });
+    });
+  }, []);
+
   return (
     <View style={styles.container}>
-      <FastSquircleView style={styles.box} cornerSmoothing={0.6}>
+      <SquircleView style={styles.box} ref={ref}>
         {/* <View style={{ width: 50, aspectRatio: 1, backgroundColor: 'blue' }} /> */}
-      </FastSquircleView>
+      </SquircleView>
+
+      <View style={styles.box} />
     </View>
   );
 }
