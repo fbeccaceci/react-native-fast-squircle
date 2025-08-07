@@ -26,7 +26,11 @@ export default function App() {
         />
       </SquircleView>
 
-      <View style={styles.box} />
+      <View style={styles.box}>
+        <View
+          style={{ width: '100%', height: '100%', backgroundColor: 'blue' }}
+        />
+      </View>
     </View>
   );
 }
@@ -40,21 +44,15 @@ const styles = StyleSheet.create({
 
   box: {
     width: 200,
-    height: 200,
+    height: 300,
     margin: 10,
 
     backgroundColor: '#DDDAD0',
-    borderColor: '#c2bfb6',
 
-    borderRadius: 30,
-    borderWidth: 10,
+    borderRadius: 20,
 
-    borderTopLeftRadius: 50,
-
-    boxShadow: '10px 5px 5px teal',
     overflow: 'hidden',
 
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 30,
   },
 });

@@ -201,7 +201,7 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
   CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
   maskLayer.path = squirclePath.CGPath;
   
-  // border
+  // background
   
   // if the RN code already added a background dedicated layer it is easier to just mask it
   if (backgroundColorLayer) {
@@ -223,7 +223,7 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
       [self.layer addSublayer:_squircleBackgroundLayer];
     }
     
-    _squircleBackgroundLayer.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.width);
+    _squircleBackgroundLayer.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height);
     _squircleBackgroundLayer.mask = maskLayer;
     _squircleBackgroundLayer.backgroundColor = originalBackgroundColor;
     [_squircleBackgroundLayer removeAllAnimations];
@@ -269,10 +269,12 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
   }
   
   // clipping
+  self.currentContainerView.layer.mask = nil;
+  self.currentContainerView.layer.cornerRadius = 0;
   if (self.currentContainerView.clipsToBounds) {
     float borderWidth = borderMetrics.borderWidths.left;
-    squircleParams.width = @(squircleParams.width.floatValue - 2 * borderWidth);
-    squircleParams.height = @(squircleParams.height.floatValue - 2 * borderWidth);
+    squircleParams.width = @(self.bounds.size.width - 2 * borderWidth);
+    squircleParams.height = @(self.bounds.size.height - 2 * borderWidth);
     
     squircleParams.cornerRadius = @(fmax(0, squircleParams.cornerRadius.floatValue - borderWidth));
     squircleParams.topLeftCornerRadius = @(fmax(0, squircleParams.topLeftCornerRadius.floatValue - borderWidth));
