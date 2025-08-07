@@ -1,6 +1,6 @@
 {
   "name": "react-native-fast-squircle",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Squicle shape implemented natively for optimal performance",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
