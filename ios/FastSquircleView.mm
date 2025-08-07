@@ -115,6 +115,7 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
 @interface RCTViewComponentView ()
 - (void)invalidateLayer;
 - (UIView *)currentContainerView;
+- (BOOL)styleWouldClipOverflowInk;
 @end
 
 @interface FastSquircleView () <RCTFastSquircleViewViewProtocol>
@@ -244,7 +245,7 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
       RCTBorderStyleFromBorderStyle(borderMetrics.borderStyles.left),
       cornerSmoothing);
   } else {
-    if (!_squircleBorderLayer) {
+    if (!_squircleBorderLayer && self.layer.bounds.size.width > 0 && self.layer.bounds.size.height > 0) {
       CALayer *borderLayer = [CALayer new];
       borderLayer.zPosition = BACKGROUND_COLOR_ZPOSITION + 1;
       borderLayer.frame = self.layer.bounds;
@@ -314,6 +315,12 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
     
     boxShadowLayer.contents = (id)boxShadowImage.CGImage;
   }
+}
+
+- (BOOL)styleWouldClipOverflowInk
+{
+  // If the overflow is hidden we foce to use a subview for rendering, that allows for better clipping preserving borders
+  return [super styleWouldClipOverflowInk] || self.currentContainerView.clipsToBounds;
 }
 
 -(NSNumber *)toSingleValue:(CornerRadii)cornerRadii

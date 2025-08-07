@@ -50,9 +50,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#DDDAD0',
 
     borderRadius: 20,
+    // borderTopRightRadius: 40,
 
     overflow: 'hidden',
 
-    padding: 30,
+    // padding: 30,
+
+    borderWidth: 4,
+    borderColor: 'red',
+
+    // outlineWidth: 4,
+    // outlineColor: 'green',
+
+    // boxShadow: '0 0 10px rgba(0, 0, 0, 0.5)',
   },
 });
