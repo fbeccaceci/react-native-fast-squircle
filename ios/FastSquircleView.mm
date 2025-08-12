@@ -253,6 +253,8 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
       [self.layer addSublayer:borderLayer];
       _squircleBorderLayer = borderLayer;
     }
+    
+    _squircleBorderLayer.frame = self.layer.bounds;
 
     self.layer.borderWidth = 0;
     self.layer.borderColor = nil;
