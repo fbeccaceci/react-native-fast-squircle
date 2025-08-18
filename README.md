@@ -58,7 +58,7 @@ import SquircleView from 'react-native-fast-squircle';
 
 export default function App() {
   return (
-    <FastSquircleView
+    <SquircleView
       style={{
         width: 200,
         height: 200,
