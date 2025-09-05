@@ -105,7 +105,7 @@ func getSquirclePath(params: SquircleParams) -> UIBezierPath {
       cornerRadius: min(roundingAndSmoothingBudget, bottomRightCornerRadius),
       cornerSmoothing: cornerSmoothing,
       roundingAndSmoothingBudget: roundingAndSmoothingBudget
-    )),
+    ))
   )
 }
 
