@@ -1,10 +1,7 @@
-import { useRef } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import SquircleView from 'react-native-fast-squircle';
 
 export default function App() {
-  const ref = useRef<View>(null);
-
   function onPress() {
     Alert.alert('Pressed!');
   }
@@ -12,14 +9,14 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Pressable onPress={onPress}>
-        <SquircleView style={styles.box} ref={ref}>
+        <SquircleView style={styles.box}>
           <View
             style={{ width: '100%', height: '100%', backgroundColor: 'blue' }}
           />
         </SquircleView>
       </Pressable>
 
-      <SquircleView style={styles.box} ref={ref}>
+      <SquircleView style={styles.box}>
         <Pressable onPress={onPress}>
           <View
             style={{ width: '100%', height: '100%', backgroundColor: 'blue' }}
@@ -27,7 +24,7 @@ export default function App() {
         </Pressable>
       </SquircleView>
 
-      <View style={styles.box} ref={ref}>
+      <View style={styles.box}>
         <Pressable onPress={onPress}>
           <View
             style={{ width: '100%', height: '100%', backgroundColor: 'blue' }}
@@ -53,5 +50,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'grey',
 
     padding: 20,
+
+    borderRadius: 30,
+
+    boxShadow: '-20px -20px 0px 5px #000000AA',
   },
 });

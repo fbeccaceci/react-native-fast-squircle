@@ -4,6 +4,7 @@
 #import <react/renderer/components/FastSquircleViewSpec/EventEmitters.h>
 #import <react/renderer/components/FastSquircleViewSpec/Props.h>
 #import <react/renderer/components/FastSquircleViewSpec/RCTComponentViewHelpers.h>
+#import <React-cxxreact/cxxreact/ReactNativeVersion.h>
 
 #import "RCTFabricComponentsPlugins.h"
 
@@ -12,7 +13,11 @@
 #import <React/RCTConversions.h>
 #import "FastSquircleBorderDrawing.h"
 #import "FastSquircle-Swift.h"
-#import "FastSquircleBoxShadow.h"
+#if REACT_NATIVE_VERSION_MAJOR > 0 || REACT_NATIVE_VERSION_MINOR >= 81
+#import "FastSquircleBoxShadow_81orMore.h"
+#else
+#import "FastSquircleBoxShadow_79orMore.h"
+#endif
 
 using namespace facebook::react;
 
@@ -172,10 +177,7 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
   Ivar outlineLayerIvar = class_getInstanceVariable([RCTViewComponentView class], "_outlineLayer");
   CALayer *outlineLayer = object_getIvar(self, outlineLayerIvar);
   
-  Ivar boxShadowLayerIvar = class_getInstanceVariable([RCTViewComponentView class], "_boxShadowLayer");
-  CALayer *boxShadowLayer = object_getIvar(self, boxShadowLayerIvar);
-  
-  const auto borderMetrics = _props->resolveBorderMetrics(_layoutMetrics);
+  const BorderMetrics borderMetrics = _props->resolveBorderMetrics(_layoutMetrics);
   
   NSNumber *topLeftBorderRadius = [self toSingleValue:borderMetrics.borderRadii.topLeft];
   NSNumber *topRightBorderRadius = [self toSingleValue:borderMetrics.borderRadii.topRight];
@@ -303,6 +305,50 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
         cornerSmoothing);
   }
   
+  
+  // box shadow
+  [self handleBoxShadow:borderMetrics];
+}
+
+
+- (void)handleBoxShadow:(BorderMetrics)borderMetrics
+{
+  NSNumber *cornerSmoothing = @(_cornerSmoothing);
+  
+#if REACT_NATIVE_VERSION_MAJOR > 0 || REACT_NATIVE_VERSION_MINOR >= 81
+  Ivar boxShadowLayersIvar = class_getInstanceVariable([RCTViewComponentView class], "_boxShadowLayers");
+  NSMutableArray<CALayer *> *_boxShadowLayers = object_getIvar(self, boxShadowLayersIvar);
+  
+  CGFloat shadowLayerZPosition = -1;
+  
+  for (CALayer *boxShadowLayer in _boxShadowLayers) {
+    if (shadowLayerZPosition < 0) {
+      shadowLayerZPosition = boxShadowLayer.zPosition;
+    }
+    
+    [boxShadowLayer removeFromSuperlayer];
+  }
+  [_boxShadowLayers removeAllObjects];
+  if (!_props->boxShadow.empty()) {
+    if (!_boxShadowLayers) {
+      _boxShadowLayers = [NSMutableArray new];
+    }
+    for (auto it = _props->boxShadow.rbegin(); it != _props->boxShadow.rend(); ++it) {
+      CALayer *shadowLayer = FastSquircleGetBoxShadowLayer(
+          *it,
+          RCTCornerRadiiFromBorderRadii(borderMetrics.borderRadii),
+          RCTUIEdgeInsetsFromEdgeInsets(borderMetrics.borderWidths),
+          self.layer.bounds.size,
+          cornerSmoothing);
+      shadowLayer.zPosition = shadowLayerZPosition;
+      [self.layer addSublayer:shadowLayer];
+      [_boxShadowLayers addObject:shadowLayer];
+    }
+  }
+#else
+  Ivar boxShadowLayerIvar = class_getInstanceVariable([RCTViewComponentView class], "_boxShadowLayer");
+  CALayer *boxShadowLayer = object_getIvar(self, boxShadowLayerIvar);
+  
   // box shadow
   if (boxShadowLayer) {
     UIImage *boxShadowImage = FastSquircleGetBoxShadowImage(_props->boxShadow,
@@ -313,6 +359,7 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
     
     boxShadowLayer.contents = (id)boxShadowImage.CGImage;
   }
+#endif
 }
 
 - (BOOL)styleWouldClipOverflowInk

@@ -5,10 +5,13 @@
 //  Created by Fabrizio Beccaceci on 05/08/25.
 //
 
-#import "FastSquircleBoxShadow.h"
+#import <React-cxxreact/cxxreact/ReactNativeVersion.h>
+
+#if REACT_NATIVE_VERSION_MAJOR > 0 || REACT_NATIVE_VERSION_MINOR < 81
+
+#import "FastSquircleBoxShadow_79orMore.h"
 #import <React/RCTConversions.h>
 #import "FastSquircle-Swift.h"
-#import <React-cxxreact/cxxreact/ReactNativeVersion.h>
 
 using namespace facebook::react;
 
@@ -106,11 +109,8 @@ static void renderOutsetShadows(
         CGSizeMake(fmax(layerSize.width + 2 * spreadDistance, 0), fmax(layerSize.height + 2 * spreadDistance, 0));
     // Ensure this is drawn offscreen and will not show in the image
     CGRect shadowRect = CGRectMake(-shadowRectSize.width, 0, shadowRectSize.width, shadowRectSize.height);
-#if REACT_NATIVE_VERSION_MAJOR > 0 || REACT_NATIVE_VERSION_MINOR >= 81
-    CGPathRef shadowRectPath = RCTPathCreateWithRoundedRect(shadowRect, shadowRectCornerInsets, nil, NO);
-#else
+
     CGPathRef shadowRectPath = RCTPathCreateWithRoundedRect(shadowRect, shadowRectCornerInsets, nil);
-#endif
 
     // Second, set the shadow as graphics state so that when we fill our
     // shadow rect it will actually cast a shadow. The offset of this
@@ -205,11 +205,7 @@ static void renderInsetShadows(
   CGContextAddRect(context, outerClippingRect);
   const RCTCornerInsets cornerInsetsForLayer = RCTGetCornerInsets(cornerRadii, edgeInsets);
   
-#if REACT_NATIVE_VERSION_MAJOR > 0 || REACT_NATIVE_VERSION_MINOR >= 81
-  CGPathRef layerPath = RCTPathCreateWithRoundedRect(shadowFrame, cornerInsetsForLayer, nil, NO);
-#else
   CGPathRef layerPath = RCTPathCreateWithRoundedRect(shadowFrame, cornerInsetsForLayer, nil);
-#endif
   CGContextAddPath(context, layerPath);
   CGContextEOClip(context);
   CGPathRelease(layerPath);
@@ -250,11 +246,8 @@ static void renderInsetShadows(
 
     const RCTCornerInsets cornerInsetsForClearRegion =
         RCTGetCornerInsets(cornerRadiiForBoxShadow(cornerRadii, -spreadDistance), edgeInsets);
-#if REACT_NATIVE_VERSION_MAJOR > 0 || REACT_NATIVE_VERSION_MINOR >= 81
-    CGPathRef clearRegionPath = RCTPathCreateWithRoundedRect(clearRegionRect, cornerInsetsForClearRegion, nil, NO);
-#else
     CGPathRef clearRegionPath = RCTPathCreateWithRoundedRect(clearRegionRect, cornerInsetsForClearRegion, nil);
-#endif
+    
     CGContextAddPath(context, clearRegionPath);
 
     // Third, set the shadow graphics state with the appropriate offset such that
@@ -276,6 +269,7 @@ static void renderInsetShadows(
 
   CGContextRestoreGState(context);
 }
+
 
 UIImage *FastSquircleGetBoxShadowImage(
   const std::vector<BoxShadow> &shadows,
@@ -302,3 +296,4 @@ UIImage *FastSquircleGetBoxShadowImage(
 
   return boxShadowImage;
 }
+#endif
