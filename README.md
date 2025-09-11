@@ -4,6 +4,8 @@
 
 This library hooks into the react-native `<View />` component native renderer for iOS and Android to change it's shape, so in the end a `FastSquircleView` is just a normal `View` with a different shape and you can expect close performance to a normal `View`
 
+![Alt text](./assets/squircle-example.png)
+
 ## ✨ Features
 
 - 🚀 **Native Performance**: No SVGs involved, it's just a normal `<View />` just with a different shape
