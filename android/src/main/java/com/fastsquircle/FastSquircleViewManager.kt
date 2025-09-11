@@ -72,7 +72,7 @@ class SplitDelegate(
       specificDelegate.setProperty(view, propName, value)
   }
 
-  override fun receiveCommand(view: ReactViewGroup, commandName: String, args: ReadableArray?) {
+  override fun receiveCommand(view: ReactViewGroup, commandName: String, args: ReadableArray) {
     baseDelegate.receiveCommand(view, commandName, args)
 
     if (view is FastSquircleView)
