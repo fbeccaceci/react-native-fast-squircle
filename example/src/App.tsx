@@ -1,36 +1,23 @@
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import SquircleView from 'react-native-fast-squircle';
 
 export default function App() {
-  function onPress() {
-    Alert.alert('Pressed!');
-  }
-
   return (
     <View style={styles.container}>
-      <Pressable onPress={onPress}>
-        <SquircleView style={styles.box}>
-          <View
-            style={{ width: '100%', height: '100%', backgroundColor: 'blue' }}
-          />
-        </SquircleView>
-      </Pressable>
-
-      <SquircleView style={styles.box}>
-        <Pressable onPress={onPress}>
-          <View
-            style={{ width: '100%', height: '100%', backgroundColor: 'blue' }}
-          />
-        </Pressable>
-      </SquircleView>
-
-      <View style={styles.box}>
-        <Pressable onPress={onPress}>
-          <View
-            style={{ width: '100%', height: '100%', backgroundColor: 'blue' }}
-          />
-        </Pressable>
+      <View style={styles.textContainer}>
+        <Text style={styles.label}>Squircle</Text>
+        <SquircleView style={styles.box} cornerSmoothing={1} />
       </View>
+
+      <View style={styles.textContainer}>
+        <Text style={styles.label}>Normal View</Text>
+        <View style={styles.box} />
+      </View>
+
+      <Text style={styles.caption}>
+        Notice how the squircle has a smooth, rounded appearance while the
+        normal view has sharp corners.
+      </Text>
     </View>
   );
 }
@@ -44,15 +31,30 @@ const styles = StyleSheet.create({
     gap: 70,
   },
 
+  textContainer: {
+    alignItems: 'center',
+    gap: 10,
+  },
+
+  label: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+
+  caption: {
+    fontSize: 14,
+    fontWeight: '400',
+    textAlign: 'center',
+    width: '80%',
+  },
+
   box: {
     height: 160,
     aspectRatio: 1,
-    backgroundColor: 'grey',
+    backgroundColor: '#C1D7EA',
 
     padding: 20,
 
     borderRadius: 30,
-
-    boxShadow: '-20px -20px 0px 5px #000000AA',
   },
 });
