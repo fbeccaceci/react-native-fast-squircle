@@ -3,6 +3,7 @@ package com.fastsquircle;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
@@ -10,11 +11,14 @@ import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 
 import com.facebook.react.common.annotations.UnstableReactNativeAPI;
+import com.facebook.react.internal.featureflags.ReactNativeFeatureFlags;
+import com.facebook.react.uimanager.drawable.BackgroundDrawable;
 import com.facebook.react.uimanager.drawable.CSSBackgroundDrawable;
 import com.facebook.react.uimanager.drawable.CompositeBackgroundDrawable;
 import com.facebook.react.uimanager.drawable.OutsetBoxShadowDrawable;
 import com.facebook.react.uimanager.style.Overflow;
 import com.facebook.react.views.view.ReactViewGroup;
+import com.fastsquircle.drawables.SquircleBackgroundDrawable;
 import com.fastsquircle.drawables.SquircleCSSBackgroundDrawable;
 import com.fastsquircle.drawables.SquircleOutsetShadowDrawable;
 import com.fastsquircle.utils.SquirclePathCalculator;
@@ -24,15 +28,23 @@ import java.util.stream.Collectors;
 
 public class FastSquircleView extends ReactViewGroup {
 
+  private float cornerSmoothing = 0.0f;
+
+  private SquircleBackgroundDrawable squircleBackgroundDrawable;
+
   @OptIn(markerClass = UnstableReactNativeAPI.class)
   public FastSquircleView(@Nullable Context context) {
     super(context);
+
+    var cssBackground = ReactNativeFeatureFlags.enableNewBackgroundAndBorderDrawables()
+      ? null
+      : new SquircleCSSBackgroundDrawable(getContext(), 0);
 
     setBackground(new CompositeBackgroundDrawable(
       getContext(),
       getBackground(),
       Collections.emptyList(),
-      new SquircleCSSBackgroundDrawable(getContext(), 0),
+      cssBackground,
       null,
       null,
       null,
@@ -54,6 +66,7 @@ public class FastSquircleView extends ReactViewGroup {
       super.setBackground(background);
       return;
     }
+
     if (compositeBackground.getOuterShadows().isEmpty()) {
       super.setBackground(background);
       return;
@@ -74,25 +87,54 @@ public class FastSquircleView extends ReactViewGroup {
 
   @Override
   public void draw(@NonNull Canvas canvas) {
-    System.out.println("Running inside the draw method");
+    var background = getBackground();
+    if (!(background instanceof LayerDrawable layerDrawable)) {
+      super.draw(canvas);
+      return;
+    }
 
+    int backgroundDrawableIndex = -1;
+    for (int i = 0; i < layerDrawable.getNumberOfLayers(); i++) {
+      var layer = layerDrawable.getDrawable(i);
+
+      if (layer instanceof BackgroundDrawable) {
+        backgroundDrawableIndex = i;
+        break;
+      }
+    }
+
+    var backgroundDrawable = (BackgroundDrawable) layerDrawable.getDrawable(backgroundDrawableIndex);
+    SquircleBackgroundDrawable customBgDrawable;
+    if (this.squircleBackgroundDrawable == null) {
+      customBgDrawable = new SquircleBackgroundDrawable(backgroundDrawable, this.cornerSmoothing);
+      this.squircleBackgroundDrawable = customBgDrawable;
+    } else {
+      customBgDrawable = this.squircleBackgroundDrawable;
+      customBgDrawable.setBase(backgroundDrawable);
+    }
+
+    layerDrawable.setDrawable(backgroundDrawableIndex, customBgDrawable);
     super.draw(canvas);
+    layerDrawable.setDrawable(backgroundDrawableIndex, backgroundDrawable);
   }
 
   @OptIn(markerClass = UnstableReactNativeAPI.class)
   public void setCornerSmoothing(float cornerSmoothing) {
+    this.cornerSmoothing = cornerSmoothing;
+
+    if (this.squircleBackgroundDrawable != null) {
+      this.squircleBackgroundDrawable.setCornerSmoothing(cornerSmoothing);
+    }
+
     var background = getBackground();
-    if (!(background instanceof CompositeBackgroundDrawable compositeBackground)) {
-      return;
+    if (background instanceof CompositeBackgroundDrawable compositeBackground) {
+
+      CSSBackgroundDrawable cssBackground = compositeBackground.getCssBackground();
+      if (cssBackground instanceof SquircleCSSBackgroundDrawable squircleCssBackground) {
+        squircleCssBackground.setCornerSmoothing(cornerSmoothing);
+      }
     }
 
-    CSSBackgroundDrawable cssBackground = compositeBackground.getCssBackground();
-
-    if (!(cssBackground instanceof SquircleCSSBackgroundDrawable squircleCssBackground)) {
-      return;
-    }
-
-    squircleCssBackground.setCornerSmoothing(cornerSmoothing);
     invalidate();
     invalidateOutline();
   }
