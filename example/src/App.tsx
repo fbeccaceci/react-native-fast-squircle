@@ -52,17 +52,21 @@ const styles = StyleSheet.create({
     height: 160,
     aspectRatio: 1,
     // backgroundColor: '#C1D7EA',
-    backgroundColor: 'red',
+    // backgroundColor: 'red',
 
     padding: 20,
 
     borderWidth: 8,
     // borderColor: '#3A86FF',
     borderRadius: 30,
-    borderTopRightRadius: 20,
+    // borderTopRightRadius: 20,
 
     borderRightColor: 'blue',
 
     // boxShadow: '25px 25px 0px 0px #000000',
+
+    outlineWidth: 4,
+    outlineOffset: 10,
+    outlineColor: 'green',
   },
 });

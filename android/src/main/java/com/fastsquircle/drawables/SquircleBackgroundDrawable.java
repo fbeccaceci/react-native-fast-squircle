@@ -2,6 +2,7 @@ package com.fastsquircle.drawables;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.RectF;
 
 import androidx.annotation.NonNull;
@@ -107,6 +108,58 @@ public class SquircleBackgroundDrawable extends ComposedDrawable {
     }
 
     return null;
+  }
+
+  @Override
+  protected void onBoundsChange(@NonNull Rect bounds) {
+    super.onBoundsChange(bounds);
+    if (base == null) return;
+
+    try {
+      Class<?> clazz = base.getClass();
+      Method privateMethod = clazz.getDeclaredMethod("onBoundsChange", Rect.class);
+      privateMethod.setAccessible(true);
+
+      privateMethod.invoke(base, bounds);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  protected boolean onLevelChange(int level) {
+    var superResult = super.onLevelChange(level);
+    if (base == null) return superResult;
+
+    try {
+      Class<?> clazz = base.getClass();
+      Method privateMethod = clazz.getDeclaredMethod("onLevelChange", int.class);
+      privateMethod.setAccessible(true);
+
+      Object result = privateMethod.invoke(base, level);
+
+      return (boolean) result;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  protected boolean onStateChange(@NonNull int[] state) {
+    var superResult = super.onStateChange(state);
+    if (base == null) return superResult;
+
+    try {
+      Class<?> clazz = base.getClass();
+      Method privateMethod = clazz.getDeclaredMethod("onStateChange", int[].class);
+      privateMethod.setAccessible(true);
+
+      Object result = privateMethod.invoke(base, state);
+
+      return (boolean) result;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

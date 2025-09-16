@@ -321,50 +321,6 @@ public class ComposedDrawable extends Drawable {
     base.unscheduleSelf(what);
   }
 
-  @Override
-  protected void onBoundsChange(@NonNull Rect bounds) {
-    super.onBoundsChange(bounds);
-    try {
-      Class<?> clazz = base.getClass();
-      Method privateMethod = clazz.getDeclaredMethod("onBoundsChange", Rect.class);
-      privateMethod.setAccessible(true);
-
-      privateMethod.invoke(base, bounds);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  protected boolean onLevelChange(int level) {
-    try {
-      Class<?> clazz = base.getClass();
-      Method privateMethod = clazz.getDeclaredMethod("onLevelChange", int.class);
-      privateMethod.setAccessible(true);
-
-      Object result = privateMethod.invoke(base, level);
-
-      return (boolean) result;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  protected boolean onStateChange(@NonNull int[] state) {
-    try {
-      Class<?> clazz = base.getClass();
-      Method privateMethod = clazz.getDeclaredMethod("onStateChange", int[].class);
-      privateMethod.setAccessible(true);
-
-      Object result = privateMethod.invoke(base, state);
-
-      return (boolean) result;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   protected void updateBase(Drawable base) {
     this.base = base;
     this.setBounds(base.getBounds());

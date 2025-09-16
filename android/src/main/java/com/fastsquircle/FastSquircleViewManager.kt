@@ -68,6 +68,10 @@ class SplitDelegate(
   override fun setProperty(view: ReactViewGroup, propName: String, value: Any?) {
     baseDelegate.setProperty(view, propName, value)
 
+    // For some reason i cannot understand handling the outlineColor in the specificDelegate causes
+    // a crash so we avoid that, it will still be handles by baseDelegate so should not be a problem.
+    if (propName == "outlineColor") return
+
     if (view is FastSquircleView)
       specificDelegate.setProperty(view, propName, value)
   }
