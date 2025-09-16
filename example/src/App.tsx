@@ -51,10 +51,16 @@ const styles = StyleSheet.create({
   box: {
     height: 160,
     aspectRatio: 1,
-    backgroundColor: '#C1D7EA',
+    // backgroundColor: '#C1D7EA',
+    backgroundColor: 'red',
 
     padding: 20,
 
+    borderWidth: 4,
+    // borderColor: '#3A86FF',
     borderRadius: 30,
+    // borderTopRightRadius: 10,
+
+    // boxShadow: '25px 25px 0px 0px #000000',
   },
 });

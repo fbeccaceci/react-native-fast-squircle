@@ -18,8 +18,6 @@ public class SquircleBackgroundDrawable extends ComposedDrawable {
   private BackgroundDrawable base;
   private float cornerSmoothing;
 
-  private ComputedBorderRadius computedBorderRadius = null;
-
   public SquircleBackgroundDrawable(BackgroundDrawable base, float cornerSmoothing) {
     super(base);
     this.base = base;
@@ -28,6 +26,7 @@ public class SquircleBackgroundDrawable extends ComposedDrawable {
 
   public void setBase(BackgroundDrawable base) {
     super.updateBase(base);
+    this.base = base;
   }
 
   public void setCornerSmoothing(float cornerSmoothing) {
@@ -66,7 +65,7 @@ public class SquircleBackgroundDrawable extends ComposedDrawable {
 
       canvas.drawPath(squirclePath, backgroundPaint);
     }
-    
+
     canvas.restore();
   }
 

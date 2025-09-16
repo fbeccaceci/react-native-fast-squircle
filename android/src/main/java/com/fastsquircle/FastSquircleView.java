@@ -13,12 +13,14 @@ import androidx.annotation.OptIn;
 import com.facebook.react.common.annotations.UnstableReactNativeAPI;
 import com.facebook.react.internal.featureflags.ReactNativeFeatureFlags;
 import com.facebook.react.uimanager.drawable.BackgroundDrawable;
+import com.facebook.react.uimanager.drawable.BorderDrawable;
 import com.facebook.react.uimanager.drawable.CSSBackgroundDrawable;
 import com.facebook.react.uimanager.drawable.CompositeBackgroundDrawable;
 import com.facebook.react.uimanager.drawable.OutsetBoxShadowDrawable;
 import com.facebook.react.uimanager.style.Overflow;
 import com.facebook.react.views.view.ReactViewGroup;
 import com.fastsquircle.drawables.SquircleBackgroundDrawable;
+import com.fastsquircle.drawables.SquircleBorderDrawable;
 import com.fastsquircle.drawables.SquircleCSSBackgroundDrawable;
 import com.fastsquircle.drawables.SquircleOutsetShadowDrawable;
 import com.fastsquircle.utils.SquirclePathCalculator;
@@ -31,6 +33,7 @@ public class FastSquircleView extends ReactViewGroup {
   private float cornerSmoothing = 0.0f;
 
   private SquircleBackgroundDrawable squircleBackgroundDrawable;
+  private SquircleBorderDrawable squircleBorderDrawable;
 
   @OptIn(markerClass = UnstableReactNativeAPI.class)
   public FastSquircleView(@Nullable Context context) {
@@ -94,28 +97,42 @@ public class FastSquircleView extends ReactViewGroup {
     }
 
     int backgroundDrawableIndex = -1;
+    int borderDrawableIndex = -1;
     for (int i = 0; i < layerDrawable.getNumberOfLayers(); i++) {
       var layer = layerDrawable.getDrawable(i);
 
-      if (layer instanceof BackgroundDrawable) {
+      if (backgroundDrawableIndex < 0 && layer instanceof BackgroundDrawable) {
         backgroundDrawableIndex = i;
-        break;
+      }
+
+      if (borderDrawableIndex < 0 && layer instanceof BorderDrawable) {
+        borderDrawableIndex = i;
       }
     }
 
     var backgroundDrawable = (BackgroundDrawable) layerDrawable.getDrawable(backgroundDrawableIndex);
-    SquircleBackgroundDrawable customBgDrawable;
     if (this.squircleBackgroundDrawable == null) {
-      customBgDrawable = new SquircleBackgroundDrawable(backgroundDrawable, this.cornerSmoothing);
-      this.squircleBackgroundDrawable = customBgDrawable;
+      this.squircleBackgroundDrawable = new SquircleBackgroundDrawable(backgroundDrawable, this.cornerSmoothing);
     } else {
-      customBgDrawable = this.squircleBackgroundDrawable;
-      customBgDrawable.setBase(backgroundDrawable);
+      this.squircleBackgroundDrawable.setBase(backgroundDrawable);
     }
 
-    layerDrawable.setDrawable(backgroundDrawableIndex, customBgDrawable);
+    BorderDrawable borderDrawable = null;
+    if (borderDrawableIndex > 0) {
+      borderDrawable = (BorderDrawable) layerDrawable.getDrawable(borderDrawableIndex);
+
+      if (this.squircleBorderDrawable == null) {
+        this.squircleBorderDrawable = new SquircleBorderDrawable(borderDrawable, this.cornerSmoothing);
+      } else {
+        this.squircleBorderDrawable.setBase(borderDrawable);
+      }
+    }
+
+    layerDrawable.setDrawable(backgroundDrawableIndex, this.squircleBackgroundDrawable);
+    if (this.squircleBorderDrawable != null) layerDrawable.setDrawable(borderDrawableIndex, this.squircleBorderDrawable);
     super.draw(canvas);
     layerDrawable.setDrawable(backgroundDrawableIndex, backgroundDrawable);
+    if (this.squircleBorderDrawable != null) layerDrawable.setDrawable(borderDrawableIndex, borderDrawable);
   }
 
   @OptIn(markerClass = UnstableReactNativeAPI.class)
@@ -124,6 +141,10 @@ public class FastSquircleView extends ReactViewGroup {
 
     if (this.squircleBackgroundDrawable != null) {
       this.squircleBackgroundDrawable.setCornerSmoothing(cornerSmoothing);
+    }
+
+    if (this.squircleBorderDrawable != null) {
+      this.squircleBorderDrawable.setCornerSmoothing(cornerSmoothing);
     }
 
     var background = getBackground();
