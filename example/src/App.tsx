@@ -56,10 +56,12 @@ const styles = StyleSheet.create({
 
     padding: 20,
 
-    borderWidth: 4,
+    borderWidth: 8,
     // borderColor: '#3A86FF',
     borderRadius: 30,
-    // borderTopRightRadius: 10,
+    borderTopRightRadius: 20,
+
+    borderRightColor: 'blue',
 
     // boxShadow: '25px 25px 0px 0px #000000',
   },

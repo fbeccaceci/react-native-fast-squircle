@@ -7,16 +7,17 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.util.LayoutDirection;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.facebook.react.modules.i18nmanager.I18nUtil;
 import com.facebook.react.uimanager.PixelUtil;
 import com.facebook.react.uimanager.drawable.BorderDrawable;
-import com.facebook.react.uimanager.style.BorderColors;
 import com.facebook.react.uimanager.style.ColorEdges;
 import com.facebook.react.uimanager.style.ComputedBorderRadius;
 import com.facebook.react.uimanager.style.CornerRadii;
@@ -34,6 +35,12 @@ public class SquircleBorderDrawable extends ComposedDrawable {
 
   private ColorEdges mComputedBorderColors = new ColorEdges();
   private Path mCenterDrawPath = null;
+  private Path mOuterClipPathForBorderRadius = null;
+  private Path mInnerClipPathForBorderRadius = null;
+
+  private @Nullable Path mPathForBorder;
+
+  private final float mGapBetweenPaths = 0.8f;
 
   public SquircleBorderDrawable(BorderDrawable base, float cornerSmoothing) {
     super(base);
@@ -78,18 +85,17 @@ public class SquircleBorderDrawable extends ComposedDrawable {
     canvas.save();
 
     var borderWidth = computeBorderInsets();
-    var outerClipPathForBorderRadius = getOuterClipPathForBorderRadius();
     var borderPaint = getBorderPaint();
     var borderAlpha = getBorderAlpha();
+
+    // Clip outer border
+    canvas.clipPath(
+      Objects.requireNonNull(mOuterClipPathForBorderRadius), Region.Op.INTERSECT);
 
     if (borderWidth.top > 0
       || borderWidth.bottom > 0
       || borderWidth.left > 0
       || borderWidth.right > 0) {
-
-      // Clip outer border
-      canvas.clipPath(
-        Objects.requireNonNull(outerClipPathForBorderRadius), Region.Op.INTERSECT);
 
       // If it's a full and even border draw inner rect path with stroke
       final float fullBorderWidth = getFullBorderWidth();
@@ -111,117 +117,79 @@ public class SquircleBorderDrawable extends ComposedDrawable {
         }
       }
       // In the case of uneven border widths/colors draw quadrilateral in each direction
-//      else {
-//        mPaint.setStyle(Paint.Style.FILL);
-//
-//        // Clip inner border
-//        canvas.clipPath(
-//          Objects.requireNonNull(mInnerClipPathForBorderRadius), Region.Op.DIFFERENCE);
-//
-//        final boolean isRTL = getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
-//        int colorStart = getBorderColor(Spacing.START);
-//        int colorEnd = getBorderColor(Spacing.END);
-//
-//        if (I18nUtil.getInstance().doLeftAndRightSwapInRTL(mContext)) {
-//          if (!isBorderColorDefined(Spacing.START)) {
-//            colorStart = colorLeft;
-//          }
-//
-//          if (!isBorderColorDefined(Spacing.END)) {
-//            colorEnd = colorRight;
-//          }
-//
-//          final int directionAwareColorLeft = isRTL ? colorEnd : colorStart;
-//          final int directionAwareColorRight = isRTL ? colorStart : colorEnd;
-//
-//          colorLeft = directionAwareColorLeft;
-//          colorRight = directionAwareColorRight;
-//        } else {
-//          final int directionAwareColorLeft = isRTL ? colorEnd : colorStart;
-//          final int directionAwareColorRight = isRTL ? colorStart : colorEnd;
-//
-//          final boolean isColorStartDefined = isBorderColorDefined(Spacing.START);
-//          final boolean isColorEndDefined = isBorderColorDefined(Spacing.END);
-//          final boolean isDirectionAwareColorLeftDefined =
-//            isRTL ? isColorEndDefined : isColorStartDefined;
-//          final boolean isDirectionAwareColorRightDefined =
-//            isRTL ? isColorStartDefined : isColorEndDefined;
-//
-//          if (isDirectionAwareColorLeftDefined) {
-//            colorLeft = directionAwareColorLeft;
-//          }
-//
-//          if (isDirectionAwareColorRightDefined) {
-//            colorRight = directionAwareColorRight;
-//          }
-//        }
-//
-//        final RectF outerClipTempRect =
-//          Objects.requireNonNull(mOuterClipTempRectForBorderRadius);
-//        final float left = outerClipTempRect.left;
-//        final float right = outerClipTempRect.right;
-//        final float top = outerClipTempRect.top;
-//        final float bottom = outerClipTempRect.bottom;
-//
-//        final PointF innerTopLeftCorner = Objects.requireNonNull(mInnerTopLeftCorner);
-//        final PointF innerTopRightCorner = Objects.requireNonNull(mInnerTopRightCorner);
-//        final PointF innerBottomLeftCorner = Objects.requireNonNull(mInnerBottomLeftCorner);
-//        final PointF innerBottomRightCorner = Objects.requireNonNull(mInnerBottomRightCorner);
-//
-//        // mGapBetweenPaths is used to close the gap between the diagonal
-//        // edges of the quadrilaterals on adjacent sides of the rectangle
-//        if (borderWidth.left > 0) {
-//          final float x1 = left;
-//          final float y1 = top - mGapBetweenPaths;
-//          final float x2 = innerTopLeftCorner.x;
-//          final float y2 = innerTopLeftCorner.y - mGapBetweenPaths;
-//          final float x3 = innerBottomLeftCorner.x;
-//          final float y3 = innerBottomLeftCorner.y + mGapBetweenPaths;
-//          final float x4 = left;
-//          final float y4 = bottom + mGapBetweenPaths;
-//
-//          drawQuadrilateral(canvas, colorLeft, x1, y1, x2, y2, x3, y3, x4, y4);
-//        }
-//
-//        if (borderWidth.top > 0) {
-//          final float x1 = left - mGapBetweenPaths;
-//          final float y1 = top;
-//          final float x2 = innerTopLeftCorner.x - mGapBetweenPaths;
-//          final float y2 = innerTopLeftCorner.y;
-//          final float x3 = innerTopRightCorner.x + mGapBetweenPaths;
-//          final float y3 = innerTopRightCorner.y;
-//          final float x4 = right + mGapBetweenPaths;
-//          final float y4 = top;
-//
-//          drawQuadrilateral(canvas, colorTop, x1, y1, x2, y2, x3, y3, x4, y4);
-//        }
-//
-//        if (borderWidth.right > 0) {
-//          final float x1 = right;
-//          final float y1 = top - mGapBetweenPaths;
-//          final float x2 = innerTopRightCorner.x;
-//          final float y2 = innerTopRightCorner.y - mGapBetweenPaths;
-//          final float x3 = innerBottomRightCorner.x;
-//          final float y3 = innerBottomRightCorner.y + mGapBetweenPaths;
-//          final float x4 = right;
-//          final float y4 = bottom + mGapBetweenPaths;
-//
-//          drawQuadrilateral(canvas, colorRight, x1, y1, x2, y2, x3, y3, x4, y4);
-//        }
-//
-//        if (borderWidth.bottom > 0) {
-//          final float x1 = left - mGapBetweenPaths;
-//          final float y1 = bottom;
-//          final float x2 = innerBottomLeftCorner.x - mGapBetweenPaths;
-//          final float y2 = innerBottomLeftCorner.y;
-//          final float x3 = innerBottomRightCorner.x + mGapBetweenPaths;
-//          final float y3 = innerBottomRightCorner.y;
-//          final float x4 = right + mGapBetweenPaths;
-//          final float y4 = bottom;
-//
-//          drawQuadrilateral(canvas, colorBottom, x1, y1, x2, y2, x3, y3, x4, y4);
-//        }
-//      }
+      else {
+        borderPaint.setStyle(Paint.Style.FILL);
+
+        // Clip inner border
+        canvas.clipPath(
+          Objects.requireNonNull(mInnerClipPathForBorderRadius), Region.Op.DIFFERENCE);
+
+
+        final RectF outerClipTempRect = Objects.requireNonNull(getOuterClipTempRectForBorderRadius());
+        final float left = outerClipTempRect.left;
+        final float right = outerClipTempRect.right;
+        final float top = outerClipTempRect.top;
+        final float bottom = outerClipTempRect.bottom;
+
+        final PointF innerTopLeftCorner = Objects.requireNonNull(getInnerTopLeftCorner());
+        final PointF innerTopRightCorner = Objects.requireNonNull(getInnerTopRightCorner());
+        final PointF innerBottomLeftCorner = Objects.requireNonNull(getInnerBottomLeftCorner());
+        final PointF innerBottomRightCorner = Objects.requireNonNull(getInnerBottomRightCorner());
+
+        // mGapBetweenPaths is used to close the gap between the diagonal
+        // edges of the quadrilaterals on adjacent sides of the rectangle
+        if (borderWidth.left > 0) {
+          final float x1 = left;
+          final float y1 = top - mGapBetweenPaths;
+          final float x2 = innerTopLeftCorner.x;
+          final float y2 = innerTopLeftCorner.y - mGapBetweenPaths;
+          final float x3 = innerBottomLeftCorner.x;
+          final float y3 = innerBottomLeftCorner.y + mGapBetweenPaths;
+          final float x4 = left;
+          final float y4 = bottom + mGapBetweenPaths;
+
+          drawQuadrilateral(canvas, mComputedBorderColors.getLeft(), x1, y1, x2, y2, x3, y3, x4, y4);
+        }
+
+        if (borderWidth.top > 0) {
+          final float x1 = left - mGapBetweenPaths;
+          final float y1 = top;
+          final float x2 = innerTopLeftCorner.x - mGapBetweenPaths;
+          final float y2 = innerTopLeftCorner.y;
+          final float x3 = innerTopRightCorner.x + mGapBetweenPaths;
+          final float y3 = innerTopRightCorner.y;
+          final float x4 = right + mGapBetweenPaths;
+          final float y4 = top;
+
+          drawQuadrilateral(canvas, mComputedBorderColors.getTop(), x1, y1, x2, y2, x3, y3, x4, y4);
+        }
+
+        if (borderWidth.right > 0) {
+          final float x1 = right;
+          final float y1 = top - mGapBetweenPaths;
+          final float x2 = innerTopRightCorner.x;
+          final float y2 = innerTopRightCorner.y - mGapBetweenPaths;
+          final float x3 = innerBottomRightCorner.x;
+          final float y3 = innerBottomRightCorner.y + mGapBetweenPaths;
+          final float x4 = right;
+          final float y4 = bottom + mGapBetweenPaths;
+
+          drawQuadrilateral(canvas, mComputedBorderColors.getRight(), x1, y1, x2, y2, x3, y3, x4, y4);
+        }
+
+        if (borderWidth.bottom > 0) {
+          final float x1 = left - mGapBetweenPaths;
+          final float y1 = bottom;
+          final float x2 = innerBottomLeftCorner.x - mGapBetweenPaths;
+          final float y2 = innerBottomLeftCorner.y;
+          final float x3 = innerBottomRightCorner.x + mGapBetweenPaths;
+          final float y3 = innerBottomRightCorner.y;
+          final float x4 = right + mGapBetweenPaths;
+          final float y4 = bottom;
+
+          drawQuadrilateral(canvas, mComputedBorderColors.getBottom(), x1, y1, x2, y2, x3, y3, x4, y4);
+        }
+      }
     }
 
     canvas.restore();
@@ -261,10 +229,30 @@ public class SquircleBorderDrawable extends ComposedDrawable {
       return;
     }
 
+    var outerClipTempRectForBorderRadius = getOuterClipTempRectForBorderRadius();
+    if (outerClipTempRectForBorderRadius == null) {
+      return;
+    }
+
+    var innerClipTempRectForBorderRadius = getInnerClipTempRectForBorderRadius();
+    if (innerClipTempRectForBorderRadius == null) {
+      return;
+    }
+
     if (mCenterDrawPath == null) {
       mCenterDrawPath = new Path();
     }
     mCenterDrawPath.reset();
+
+    if (mOuterClipPathForBorderRadius == null) {
+      mOuterClipPathForBorderRadius = new Path();
+    }
+    mOuterClipPathForBorderRadius.reset();
+
+    if (mInnerClipPathForBorderRadius == null) {
+      mInnerClipPathForBorderRadius = new Path();
+    }
+    mInnerClipPathForBorderRadius.reset();
 
     var computedBorderRadius = getComputedBorderRadius();
     var borderWidth = computeBorderInsets();
@@ -296,7 +284,92 @@ public class SquircleBorderDrawable extends ComposedDrawable {
       );
     }
 
-    var mCenterDrawPathRadius = new ComputedBorderRadius(
+    var outerClipPathBorderRadius = new ComputedBorderRadius(
+      new CornerRadii(
+        topLeftRadius.getHorizontal() > 0
+          ? PixelUtil.toDIPFromPixel(topLeftRadius.getHorizontal())
+          : 0,
+        topLeftRadius.getVertical() > 0
+          ? PixelUtil.toDIPFromPixel(topLeftRadius.getVertical())
+          : 0
+      ),
+      new CornerRadii(
+        topRightRadius.getHorizontal() > 0
+          ? PixelUtil.toDIPFromPixel(topRightRadius.getHorizontal())
+          : 0,
+        topRightRadius.getVertical() > 0
+          ? PixelUtil.toDIPFromPixel(topRightRadius.getVertical())
+          : 0
+      ),
+      new CornerRadii(
+        bottomLeftRadius.getHorizontal() > 0
+          ? PixelUtil.toDIPFromPixel(bottomLeftRadius.getHorizontal())
+          : 0,
+        bottomLeftRadius.getVertical() > 0
+          ? PixelUtil.toDIPFromPixel(bottomLeftRadius.getVertical())
+          : 0
+      ),
+      new CornerRadii(
+        bottomRightRadius.getHorizontal() > 0 ?
+          PixelUtil.toDIPFromPixel(bottomRightRadius.getHorizontal())
+          : 0,
+        bottomRightRadius.getVertical() > 0 ?
+          PixelUtil.toDIPFromPixel(bottomRightRadius.getVertical())
+          : 0
+      )
+    );
+
+    mOuterClipPathForBorderRadius.set(SquirclePathCalculator.getPath(
+      outerClipPathBorderRadius,
+      outerClipTempRectForBorderRadius.width(),
+      outerClipTempRectForBorderRadius.height(),
+      this.cornerSmoothing
+    ));
+
+    var innerClipPathBorderRadius = new ComputedBorderRadius(
+      new CornerRadii(
+        topLeftRadius.getHorizontal() > 0
+          ? PixelUtil.toDIPFromPixel(topLeftRadius.getHorizontal() - borderWidth.left)
+          : 0,
+        topLeftRadius.getVertical() > 0
+          ? PixelUtil.toDIPFromPixel(topLeftRadius.getVertical() - borderWidth.top)
+          : 0
+      ),
+      new CornerRadii(
+        topRightRadius.getHorizontal() > 0
+          ? PixelUtil.toDIPFromPixel(topRightRadius.getHorizontal() - borderWidth.right)
+          : 0,
+        topRightRadius.getVertical() > 0
+          ? PixelUtil.toDIPFromPixel(topRightRadius.getVertical() - borderWidth.top)
+          : 0
+      ),
+      new CornerRadii(
+        bottomLeftRadius.getHorizontal() > 0
+          ? PixelUtil.toDIPFromPixel(bottomLeftRadius.getHorizontal() - borderWidth.left)
+          : 0,
+        bottomLeftRadius.getVertical() > 0
+          ? PixelUtil.toDIPFromPixel(bottomLeftRadius.getVertical() - borderWidth.bottom)
+          : 0
+      ),
+      new CornerRadii(
+        bottomRightRadius.getHorizontal() > 0 ?
+          PixelUtil.toDIPFromPixel(bottomRightRadius.getHorizontal() - borderWidth.right)
+          : 0,
+        bottomRightRadius.getVertical() > 0 ?
+          PixelUtil.toDIPFromPixel(bottomRightRadius.getVertical() - borderWidth.right)
+          : 0
+      )
+    );
+
+    mInnerClipPathForBorderRadius.set(SquirclePathCalculator.getPath(
+      innerClipPathBorderRadius,
+      innerClipTempRectForBorderRadius.width(),
+      innerClipTempRectForBorderRadius.height(),
+      this.cornerSmoothing
+    ));
+    mInnerClipPathForBorderRadius.offset(borderWidth.left, borderWidth.top);
+
+    var centerDrawPathRadius = new ComputedBorderRadius(
       new CornerRadii(
         topLeftRadius.getHorizontal() > 0
           ? PixelUtil.toDIPFromPixel(topLeftRadius.getHorizontal() - borderWidth.left * 0.5f)
@@ -331,7 +404,7 @@ public class SquircleBorderDrawable extends ComposedDrawable {
       )
     );
     mCenterDrawPath.set(SquirclePathCalculator.getPath(
-      mCenterDrawPathRadius,
+      centerDrawPathRadius,
       tempRectForCenterDrawPath.width(),
       tempRectForCenterDrawPath.height(),
       this.cornerSmoothing
@@ -368,8 +441,8 @@ public class SquircleBorderDrawable extends ComposedDrawable {
     }
   }
 
-  private BorderColors getBorderColors() {
-    return (BorderColors) getVariableWithReflection("borderColors");
+  private Integer[] getBorderColors() {
+    return (Integer[]) getVariableWithReflection("borderColors");
   }
 
   private ColorEdges getComputedBorderColors() {
@@ -404,6 +477,30 @@ public class SquircleBorderDrawable extends ComposedDrawable {
     return (RectF) getVariableWithReflection("tempRectForCenterDrawPath");
   }
 
+  private PointF getInnerTopLeftCorner() {
+    return (PointF) getVariableWithReflection("innerTopLeftCorner");
+  }
+
+  private PointF getInnerTopRightCorner() {
+    return (PointF) getVariableWithReflection("innerTopRightCorner");
+  }
+
+  private PointF getInnerBottomLeftCorner() {
+    return (PointF) getVariableWithReflection("innerBottomLeftCorner");
+  }
+
+  private PointF getInnerBottomRightCorner() {
+    return (PointF) getVariableWithReflection("innerBottomRightCorner");
+  }
+
+  private RectF getOuterClipTempRectForBorderRadius() {
+    return (RectF) getVariableWithReflection("outerClipTempRectForBorderRadius");
+  }
+
+  private RectF getInnerClipTempRectForBorderRadius() {
+    return (RectF) getVariableWithReflection("innerClipTempRectForBorderRadius");
+  }
+
   private Object getVariableWithReflection(String fieldName) {
     try {
       Field field = BorderDrawable.class.getDeclaredField(fieldName);
@@ -420,8 +517,7 @@ public class SquircleBorderDrawable extends ComposedDrawable {
     return null;
   }
 
-  private ColorEdges resolveBorderColors(BorderColors borderColors, int layoutDirection, Context context) {
-    var edgeColors = borderColors.getEdgeColors();
+  private ColorEdges resolveBorderColors(Integer[] edgeColors, int layoutDirection, Context context) {
 
     return switch (layoutDirection) {
       case LayoutDirection.LTR -> new ColorEdges(
@@ -519,5 +615,35 @@ public class SquircleBorderDrawable extends ComposedDrawable {
     }
 
     return Color.BLACK;
+  }
+
+  private void drawQuadrilateral(
+    Canvas canvas,
+    int fillColor,
+    float x1,
+    float y1,
+    float x2,
+    float y2,
+    float x3,
+    float y3,
+    float x4,
+    float y4) {
+    if (fillColor == Color.TRANSPARENT) {
+      return;
+    }
+
+    if (mPathForBorder == null) {
+      mPathForBorder = new Path();
+    }
+
+    var paint = getBorderPaint();
+    paint.setColor(fillColor);
+    mPathForBorder.reset();
+    mPathForBorder.moveTo(x1, y1);
+    mPathForBorder.lineTo(x2, y2);
+    mPathForBorder.lineTo(x3, y3);
+    mPathForBorder.lineTo(x4, y4);
+    mPathForBorder.lineTo(x1, y1);
+    canvas.drawPath(mPathForBorder, paint);
   }
 }
