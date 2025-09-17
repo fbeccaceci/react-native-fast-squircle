@@ -81,7 +81,7 @@ public class FastSquircleView extends ReactViewGroup {
 
     var enhancedOutsetShadows = compositeBackground.getOuterShadows().stream().map(s -> {
       if (s instanceof OutsetBoxShadowDrawable) {
-        return new SquircleOutsetShadowDrawable((OutsetBoxShadowDrawable) s);
+        return new SquircleOutsetShadowDrawable((OutsetBoxShadowDrawable) s, this.cornerSmoothing);
       }
 
       return s;

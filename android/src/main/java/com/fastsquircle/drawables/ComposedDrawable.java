@@ -21,8 +21,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
-
 public class ComposedDrawable extends Drawable {
 
   private Drawable base;

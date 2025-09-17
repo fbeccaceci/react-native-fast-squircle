@@ -56,17 +56,17 @@ const styles = StyleSheet.create({
 
     padding: 20,
 
-    borderWidth: 8,
+    // borderWidth: 8,
     // borderColor: '#3A86FF',
     borderRadius: 30,
-    // borderTopRightRadius: 20,
+    // borderTopRightRadius: 10,
 
     borderRightColor: 'blue',
 
-    // boxShadow: '25px 25px 0px 0px #000000',
+    boxShadow: '10px 10px 0px 20px #000000',
 
-    outlineWidth: 4,
-    outlineOffset: 10,
-    outlineColor: 'green',
+    // outlineWidth: 4,
+    // outlineOffset: 10,
+    // outlineColor: 'green',
   },
 });
