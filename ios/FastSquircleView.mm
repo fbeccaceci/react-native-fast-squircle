@@ -4,7 +4,6 @@
 #import <react/renderer/components/FastSquircleViewSpec/EventEmitters.h>
 #import <react/renderer/components/FastSquircleViewSpec/Props.h>
 #import <react/renderer/components/FastSquircleViewSpec/RCTComponentViewHelpers.h>
-#import <React-cxxreact/cxxreact/ReactNativeVersion.h>
 
 #import "RCTFabricComponentsPlugins.h"
 
@@ -12,8 +11,8 @@
 #import <React/RCTBorderDrawing.h>
 #import <React/RCTConversions.h>
 #import "FastSquircleBorderDrawing.h"
-#import "FastSquircle-Swift.h"
-#if REACT_NATIVE_VERSION_MAJOR > 0 || REACT_NATIVE_VERSION_MINOR >= 81
+#import "SwiftImport.h"
+#if REACT_NATIVE_MINOR_VERSION >= 81
 #import "FastSquircleBoxShadow_81orMore.h"
 #else
 #import "FastSquircleBoxShadow_79orMore.h"
@@ -315,7 +314,7 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
 {
   NSNumber *cornerSmoothing = @(_cornerSmoothing);
   
-#if REACT_NATIVE_VERSION_MAJOR > 0 || REACT_NATIVE_VERSION_MINOR >= 81
+#if REACT_NATIVE_MINOR_VERSION >= 81
   Ivar boxShadowLayersIvar = class_getInstanceVariable([RCTViewComponentView class], "_boxShadowLayers");
   NSMutableArray<CALayer *> *_boxShadowLayers = object_getIvar(self, boxShadowLayersIvar);
   

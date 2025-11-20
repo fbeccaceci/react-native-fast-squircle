@@ -5,13 +5,11 @@
 //  Created by Fabrizio Beccaceci on 10/09/25.
 //
 
-#import <React-cxxreact/cxxreact/ReactNativeVersion.h>
-
-#if REACT_NATIVE_VERSION_MAJOR > 0 || REACT_NATIVE_VERSION_MINOR >= 81
+#if REACT_NATIVE_MINOR_VERSION >= 81
 
 #import "FastSquircleBoxShadow_81orMore.h"
 #import <React/RCTConversions.h>
-#import "FastSquircle-Swift.h"
+#import "SwiftImport.h"
 
 static CGFloat adjustedCornerRadius(CGFloat cornerRadius, CGFloat spreadDistance)
 {

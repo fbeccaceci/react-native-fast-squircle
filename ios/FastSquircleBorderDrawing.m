@@ -7,7 +7,7 @@
 
 #import "FastSquircleBorderDrawing.h"
 #import <React/RCTUtils.h>
-#import "FastSquircle-Swift.h"
+#import "SwiftImport.h"
 
 static const CGFloat RCTViewBorderThreshold = 0.001;
 
