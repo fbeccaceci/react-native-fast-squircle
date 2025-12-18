@@ -29,6 +29,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
 
     gap: 70,
+
+    backgroundColor: '#FFFFFF',
   },
 
   textContainer: {
