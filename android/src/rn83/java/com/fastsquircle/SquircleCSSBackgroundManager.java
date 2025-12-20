@@ -1,22 +1,20 @@
 package com.fastsquircle;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 
 import com.facebook.react.uimanager.drawable.BackgroundDrawable;
 import com.facebook.react.uimanager.drawable.CompositeBackgroundDrawable;
 
-public class SquircleCSSBackgroundManagerImpl implements SquircleCSSBackgroundManager {
-  @Override
-  public BackgroundDrawable getCSSBackground() {
+public class SquircleCSSBackgroundManager {
+  public BackgroundDrawable getCSSBackground(Context context) {
     return null;
   }
 
-  @Override
-  public void setCornerSmoothing(Drawable background) {
+  public void setCornerSmoothing(Drawable background, float cornerSmoothing) {
   }
 
-  @Override
   public void dispatchDraw(Canvas canvas, CompositeBackgroundDrawable compositeBackgroundDrawable) {
   }
 
