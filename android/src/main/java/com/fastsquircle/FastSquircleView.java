@@ -37,19 +37,17 @@ public class FastSquircleView extends ReactViewGroup {
 
   private SquircleOutlineDrawable squircleOutlineDrawable;
 
+  private SquircleCSSBackgroundManager cssBackgroundManager = new SquircleCSSBackgroundManagerImpl();
+
   @OptIn(markerClass = UnstableReactNativeAPI.class)
   public FastSquircleView(@Nullable Context context) {
     super(context);
-
-    var cssBackground = ReactNativeFeatureFlags.enableNewBackgroundAndBorderDrawables()
-      ? null
-      : new SquircleCSSBackgroundDrawable(getContext(), 0);
 
     setBackground(new CompositeBackgroundDrawable(
       getContext(),
       getBackground(),
       Collections.emptyList(),
-      cssBackground,
+      cssBackgroundManager.getCSSBackground(),
       null,
       null,
       null,
@@ -176,15 +174,6 @@ public class FastSquircleView extends ReactViewGroup {
       this.squircleOutlineDrawable.setCornerSmoothing(cornerSmoothing);
     }
 
-    var background = getBackground();
-    if (background instanceof CompositeBackgroundDrawable compositeBackground) {
-
-      CSSBackgroundDrawable cssBackground = compositeBackground.getCssBackground();
-      if (cssBackground instanceof SquircleCSSBackgroundDrawable squircleCssBackground) {
-        squircleCssBackground.setCornerSmoothing(cornerSmoothing);
-      }
-    }
-
     invalidate();
     invalidateOutline();
   }
@@ -209,28 +198,7 @@ public class FastSquircleView extends ReactViewGroup {
       super.dispatchDraw(canvas);
       return;
     }
-
-    CSSBackgroundDrawable cssBackground = compositeBackground.getCssBackground();
-
-    if (!(cssBackground instanceof SquircleCSSBackgroundDrawable squircleCssBackground)) {
-      super.dispatchDraw(canvas);
-      return;
-    }
-
-    var borderRadius = squircleCssBackground.getComputedBorderRadiusBorderRadius();
-    var borderWidth = squircleCssBackground.getDirectionAwareBorderInsets();
-    var cornerSmoothing = squircleCssBackground.getCornerSmoothing();
-
-    var squirclePath = SquirclePathCalculator.getPath(
-      borderRadius,
-      squircleCssBackground.getBounds().width() - (borderWidth.left + borderWidth.right),
-      squircleCssBackground.getBounds().height() - (borderWidth.top + borderWidth.bottom),
-      cornerSmoothing
-    );
-
-    squirclePath.offset(borderWidth.left, borderWidth.top);
-    canvas.clipPath(squirclePath);
-
+    
     super.dispatchDraw(canvas);
   }
 }
