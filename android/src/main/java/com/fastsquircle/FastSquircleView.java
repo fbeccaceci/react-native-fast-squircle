@@ -11,7 +11,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 
 import com.facebook.react.common.annotations.UnstableReactNativeAPI;
-import com.facebook.react.internal.featureflags.ReactNativeFeatureFlags;
 import com.facebook.react.uimanager.drawable.BackgroundDrawable;
 import com.facebook.react.uimanager.drawable.BorderDrawable;
 import com.facebook.react.uimanager.drawable.CompositeBackgroundDrawable;
@@ -23,7 +22,6 @@ import com.fastsquircle.drawables.SquircleBackgroundDrawable;
 import com.fastsquircle.drawables.SquircleBorderDrawable;
 import com.fastsquircle.drawables.SquircleOutlineDrawable;
 import com.fastsquircle.drawables.SquircleOutsetShadowDrawable;
-import com.fastsquircle.utils.SquirclePathCalculator;
 
 import java.util.Collections;
 import java.util.stream.Collectors;
@@ -37,7 +35,7 @@ public class FastSquircleView extends ReactViewGroup {
 
   private SquircleOutlineDrawable squircleOutlineDrawable;
 
-  private SquircleCSSBackgroundManager cssBackgroundManager = new SquircleCSSBackgroundManagerImpl();
+  private final SquircleCSSBackgroundManager cssBackgroundManager = new SquircleCSSBackgroundManager();
 
   @OptIn(markerClass = UnstableReactNativeAPI.class)
   public FastSquircleView(@Nullable Context context) {
@@ -47,7 +45,7 @@ public class FastSquircleView extends ReactViewGroup {
       getContext(),
       getBackground(),
       Collections.emptyList(),
-      cssBackgroundManager.getCSSBackground(),
+      cssBackgroundManager.getCSSBackground(getContext()),
       null,
       null,
       null,
@@ -174,6 +172,8 @@ public class FastSquircleView extends ReactViewGroup {
       this.squircleOutlineDrawable.setCornerSmoothing(cornerSmoothing);
     }
 
+    this.cssBackgroundManager.setCornerSmoothing(getBackground(), cornerSmoothing);
+
     invalidate();
     invalidateOutline();
   }
@@ -198,7 +198,8 @@ public class FastSquircleView extends ReactViewGroup {
       super.dispatchDraw(canvas);
       return;
     }
-    
+
+    this.cssBackgroundManager.dispatchDraw(canvas, compositeBackground);
     super.dispatchDraw(canvas);
   }
 }
