@@ -65,8 +65,11 @@ FastSquircleGetOutsetBoxShadowLayer(const facebook::react::BoxShadow &shadow, RC
 {
   CALayer *shadowLayer = initBoxShadowLayer(shadow, layerSize);
   
+  // Calculate adjusted corner radii for the spread distance
+  RCTCornerRadii adjustedCornerRadii = cornerRadiiForBoxShadow(cornerRadii, shadow.spreadDistance);
+  
   const RCTCornerInsets shadowRectCornerInsets =
-  RCTGetCornerInsets(cornerRadiiForBoxShadow(cornerRadii, shadow.spreadDistance), UIEdgeInsetsZero);
+  RCTGetCornerInsets(adjustedCornerRadii, UIEdgeInsetsZero);
   
   CGRect shadowRect = CGRectInset(shadowLayer.bounds, -shadow.spreadDistance, -shadow.spreadDistance);
   shadowRect = CGRectOffset(shadowRect, shadow.offsetX, shadow.offsetY);
@@ -74,13 +77,12 @@ FastSquircleGetOutsetBoxShadowLayer(const facebook::react::BoxShadow &shadow, RC
   CGFloat width = shadowRect.size.width;
   CGFloat height = shadowRect.size.height;
   
-  NSLog(@"width: %f, height: %f", width, height);
-  
+  // Use the ADJUSTED corner radii for the shadow path
   SquircleParams *squircleParams = [[SquircleParams alloc] initWithCornerSmoothing:cornerSmoothing width:@(width) height:@(height)];
-  squircleParams.topLeftCornerRadius = @(fmax(cornerRadii.topLeftVertical, cornerRadii.topLeftHorizontal));
-  squircleParams.topRightCornerRadius = @(fmax(cornerRadii.topRightVertical, cornerRadii.topRightHorizontal));
-  squircleParams.bottomLeftCornerRadius = @(fmax(cornerRadii.bottomLeftVertical, cornerRadii.bottomLeftHorizontal));
-  squircleParams.bottomRightCornerRadius = @(fmax(cornerRadii.bottomRightVertical, cornerRadii.bottomRightHorizontal));
+  squircleParams.topLeftCornerRadius = @(fmax(adjustedCornerRadii.topLeftVertical, adjustedCornerRadii.topLeftHorizontal));
+  squircleParams.topRightCornerRadius = @(fmax(adjustedCornerRadii.topRightVertical, adjustedCornerRadii.topRightHorizontal));
+  squircleParams.bottomLeftCornerRadius = @(fmax(adjustedCornerRadii.bottomLeftVertical, adjustedCornerRadii.bottomLeftHorizontal));
+  squircleParams.bottomRightCornerRadius = @(fmax(adjustedCornerRadii.bottomRightVertical, adjustedCornerRadii.bottomRightHorizontal));
   
   UIBezierPath *squirclePath = [SquirclePathGenerator getSquirclePath:squircleParams];
   CGAffineTransform translation = CGAffineTransformMakeTranslation(shadowRect.origin.x, shadowRect.origin.y);
@@ -97,9 +99,14 @@ FastSquircleGetOutsetBoxShadowLayer(const facebook::react::BoxShadow &shadow, RC
   CGRect maskRect = CGRectInset(shadowRect, -2 * (shadow.blurRadius + 1), -2 * (shadow.blurRadius + 1));
   CGPathAddRect(path, NULL, maskRect);
   
-  // Add the squircle path as a hole (using original layer bounds for the squircle)
+  // Add the squircle path as a hole (using original layer bounds and ORIGINAL corner radii)
   squircleParams.width = @(shadowLayer.bounds.size.width);
   squircleParams.height = @(shadowLayer.bounds.size.height);
+  // Reset to original corner radii for the cutout (not adjusted)
+  squircleParams.topLeftCornerRadius = @(fmax(cornerRadii.topLeftVertical, cornerRadii.topLeftHorizontal));
+  squircleParams.topRightCornerRadius = @(fmax(cornerRadii.topRightVertical, cornerRadii.topRightHorizontal));
+  squircleParams.bottomLeftCornerRadius = @(fmax(cornerRadii.bottomLeftVertical, cornerRadii.bottomLeftHorizontal));
+  squircleParams.bottomRightCornerRadius = @(fmax(cornerRadii.bottomRightVertical, cornerRadii.bottomRightHorizontal));
   UIBezierPath *squircleLayerPath = [SquirclePathGenerator getSquirclePath:squircleParams];
   
   CGPathRef layerPath = CGPathCreateCopy(squircleLayerPath.CGPath);

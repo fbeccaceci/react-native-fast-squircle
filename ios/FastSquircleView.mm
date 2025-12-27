@@ -170,6 +170,9 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
   Ivar backgroundColorLayerIvar = class_getInstanceVariable([RCTViewComponentView class], "_backgroundColorLayer");
   CALayer *backgroundColorLayer = object_getIvar(self, backgroundColorLayerIvar);
   
+  Ivar backgroundImageLayersIvar = class_getInstanceVariable([RCTViewComponentView class], "_backgroundImageLayers");
+  NSArray<CALayer *> *backgroundImageLayers = object_getIvar(self, backgroundImageLayersIvar);
+
   Ivar borderLayerIvar = class_getInstanceVariable([RCTViewComponentView class], "_borderLayer");
   CALayer *borderLayer = object_getIvar(self, borderLayerIvar);
   
@@ -225,6 +228,16 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
     _squircleBackgroundLayer.mask = maskLayer;
     _squircleBackgroundLayer.backgroundColor = originalBackgroundColor;
     [_squircleBackgroundLayer removeAllAnimations];
+  }
+  
+  // background image layers (gradients, images, etc.)
+  if (backgroundImageLayers && backgroundImageLayers.count > 0) {
+    for (CALayer *backgroundImageLayer in backgroundImageLayers) {
+      CAShapeLayer *backgroundImageMaskLayer = [[CAShapeLayer alloc] init];
+      backgroundImageMaskLayer.path = squirclePath.CGPath;
+      backgroundImageLayer.mask = backgroundImageMaskLayer;
+      [backgroundImageLayer removeAllAnimations];
+    }
   }
   
   // border

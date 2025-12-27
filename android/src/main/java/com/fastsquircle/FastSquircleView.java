@@ -12,6 +12,7 @@ import androidx.annotation.OptIn;
 
 import com.facebook.react.common.annotations.UnstableReactNativeAPI;
 import com.facebook.react.uimanager.drawable.BackgroundDrawable;
+import com.facebook.react.uimanager.drawable.BackgroundImageDrawable;
 import com.facebook.react.uimanager.drawable.BorderDrawable;
 import com.facebook.react.uimanager.drawable.CompositeBackgroundDrawable;
 import com.facebook.react.uimanager.drawable.OutlineDrawable;
@@ -19,6 +20,7 @@ import com.facebook.react.uimanager.drawable.OutsetBoxShadowDrawable;
 import com.facebook.react.uimanager.style.Overflow;
 import com.facebook.react.views.view.ReactViewGroup;
 import com.fastsquircle.drawables.SquircleBackgroundDrawable;
+import com.fastsquircle.drawables.SquircleBackgroundImageDrawable;
 import com.fastsquircle.drawables.SquircleBorderDrawable;
 import com.fastsquircle.drawables.SquircleOutlineDrawable;
 import com.fastsquircle.drawables.SquircleOutsetShadowDrawable;
@@ -31,6 +33,7 @@ public class FastSquircleView extends ReactViewGroup {
   private float cornerSmoothing = 0.0f;
 
   private SquircleBackgroundDrawable squircleBackgroundDrawable;
+  private SquircleBackgroundImageDrawable squircleBackgroundImageDrawable;
   private SquircleBorderDrawable squircleBorderDrawable;
 
   private SquircleOutlineDrawable squircleOutlineDrawable;
@@ -95,6 +98,7 @@ public class FastSquircleView extends ReactViewGroup {
     }
 
     int backgroundDrawableIndex = -1;
+    int backgroundImageDrawableIndex = -1;
     int borderDrawableIndex = -1;
     int outlineDrawableIndex = -1;
     for (int i = 0; i < layerDrawable.getNumberOfLayers(); i++) {
@@ -102,6 +106,10 @@ public class FastSquircleView extends ReactViewGroup {
 
       if (backgroundDrawableIndex < 0 && layer instanceof BackgroundDrawable) {
         backgroundDrawableIndex = i;
+      }
+
+      if (backgroundImageDrawableIndex < 0 && layer instanceof BackgroundImageDrawable) {
+        backgroundImageDrawableIndex = i;
       }
 
       if (borderDrawableIndex < 0 && layer instanceof BorderDrawable) {
@@ -120,6 +128,16 @@ public class FastSquircleView extends ReactViewGroup {
         this.squircleBackgroundDrawable = new SquircleBackgroundDrawable(backgroundDrawable, this.cornerSmoothing);
       } else {
         this.squircleBackgroundDrawable.setBase(backgroundDrawable);
+      }
+    }
+
+    BackgroundImageDrawable backgroundImageDrawable = null;
+    if (backgroundImageDrawableIndex >= 0) {
+      backgroundImageDrawable = (BackgroundImageDrawable) layerDrawable.getDrawable(backgroundImageDrawableIndex);
+      if (this.squircleBackgroundImageDrawable == null) {
+        this.squircleBackgroundImageDrawable = new SquircleBackgroundImageDrawable(backgroundImageDrawable, this.cornerSmoothing);
+      } else {
+        this.squircleBackgroundImageDrawable.setBase(backgroundImageDrawable);
       }
     }
 
@@ -146,12 +164,14 @@ public class FastSquircleView extends ReactViewGroup {
     }
 
     if (backgroundDrawableIndex >= 0) layerDrawable.setDrawable(backgroundDrawableIndex, this.squircleBackgroundDrawable);
+    if (backgroundImageDrawableIndex >= 0) layerDrawable.setDrawable(backgroundImageDrawableIndex, this.squircleBackgroundImageDrawable);
     if (borderDrawableIndex >= 0) layerDrawable.setDrawable(borderDrawableIndex, this.squircleBorderDrawable);
     if (outlineDrawableIndex >= 0) layerDrawable.setDrawable(outlineDrawableIndex, this.squircleOutlineDrawable);
 
     super.draw(canvas);
 
     if (backgroundDrawableIndex >= 0) layerDrawable.setDrawable(backgroundDrawableIndex, backgroundDrawable);
+    if (backgroundImageDrawableIndex >= 0) layerDrawable.setDrawable(backgroundImageDrawableIndex, backgroundImageDrawable);
     if (borderDrawableIndex >= 0) layerDrawable.setDrawable(borderDrawableIndex, borderDrawable);
     if (outlineDrawableIndex >= 0) layerDrawable.setDrawable(outlineDrawableIndex, outlineDrawable);
   }
@@ -162,6 +182,10 @@ public class FastSquircleView extends ReactViewGroup {
 
     if (this.squircleBackgroundDrawable != null) {
       this.squircleBackgroundDrawable.setCornerSmoothing(cornerSmoothing);
+    }
+
+    if (this.squircleBackgroundImageDrawable != null) {
+      this.squircleBackgroundImageDrawable.setCornerSmoothing(cornerSmoothing);
     }
 
     if (this.squircleBorderDrawable != null) {
