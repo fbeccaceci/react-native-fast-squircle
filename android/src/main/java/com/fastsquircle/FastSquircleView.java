@@ -12,7 +12,7 @@ import androidx.annotation.OptIn;
 
 import com.facebook.react.common.annotations.UnstableReactNativeAPI;
 import com.facebook.react.uimanager.drawable.BackgroundDrawable;
-import com.facebook.react.uimanager.drawable.BackgroundImageDrawable;
+//import com.facebook.react.uimanager.drawable.BackgroundImageDrawable;
 import com.facebook.react.uimanager.drawable.BorderDrawable;
 import com.facebook.react.uimanager.drawable.CompositeBackgroundDrawable;
 import com.facebook.react.uimanager.drawable.OutlineDrawable;
@@ -33,12 +33,13 @@ public class FastSquircleView extends ReactViewGroup {
   private float cornerSmoothing = 0.0f;
 
   private SquircleBackgroundDrawable squircleBackgroundDrawable;
-  private SquircleBackgroundImageDrawable squircleBackgroundImageDrawable;
+//  private SquircleBackgroundImageDrawable squircleBackgroundImageDrawable;
   private SquircleBorderDrawable squircleBorderDrawable;
 
   private SquircleOutlineDrawable squircleOutlineDrawable;
 
   private final SquircleCSSBackgroundManager cssBackgroundManager = new SquircleCSSBackgroundManager();
+  private final SquircleBackgroundImageManager backgroundImageManager = new SquircleBackgroundImageManager();
 
   @OptIn(markerClass = UnstableReactNativeAPI.class)
   public FastSquircleView(@Nullable Context context) {
@@ -97,8 +98,9 @@ public class FastSquircleView extends ReactViewGroup {
       return;
     }
 
+    var backgroundImageDrawManager = this.backgroundImageManager.getDrawManager();
+
     int backgroundDrawableIndex = -1;
-    int backgroundImageDrawableIndex = -1;
     int borderDrawableIndex = -1;
     int outlineDrawableIndex = -1;
     for (int i = 0; i < layerDrawable.getNumberOfLayers(); i++) {
@@ -108,10 +110,6 @@ public class FastSquircleView extends ReactViewGroup {
         backgroundDrawableIndex = i;
       }
 
-      if (backgroundImageDrawableIndex < 0 && layer instanceof BackgroundImageDrawable) {
-        backgroundImageDrawableIndex = i;
-      }
-
       if (borderDrawableIndex < 0 && layer instanceof BorderDrawable) {
         borderDrawableIndex = i;
       }
@@ -119,6 +117,8 @@ public class FastSquircleView extends ReactViewGroup {
       if (outlineDrawableIndex < 0 && layer instanceof OutlineDrawable) {
         outlineDrawableIndex = i;
       }
+
+      backgroundImageDrawManager.checkLayer(layer, i);
     }
 
     BackgroundDrawable backgroundDrawable = null;
@@ -131,15 +131,6 @@ public class FastSquircleView extends ReactViewGroup {
       }
     }
 
-    BackgroundImageDrawable backgroundImageDrawable = null;
-    if (backgroundImageDrawableIndex >= 0) {
-      backgroundImageDrawable = (BackgroundImageDrawable) layerDrawable.getDrawable(backgroundImageDrawableIndex);
-      if (this.squircleBackgroundImageDrawable == null) {
-        this.squircleBackgroundImageDrawable = new SquircleBackgroundImageDrawable(backgroundImageDrawable, this.cornerSmoothing);
-      } else {
-        this.squircleBackgroundImageDrawable.setBase(backgroundImageDrawable);
-      }
-    }
 
     BorderDrawable borderDrawable = null;
     if (borderDrawableIndex >= 0) {
@@ -164,16 +155,18 @@ public class FastSquircleView extends ReactViewGroup {
     }
 
     if (backgroundDrawableIndex >= 0) layerDrawable.setDrawable(backgroundDrawableIndex, this.squircleBackgroundDrawable);
-    if (backgroundImageDrawableIndex >= 0) layerDrawable.setDrawable(backgroundImageDrawableIndex, this.squircleBackgroundImageDrawable);
     if (borderDrawableIndex >= 0) layerDrawable.setDrawable(borderDrawableIndex, this.squircleBorderDrawable);
     if (outlineDrawableIndex >= 0) layerDrawable.setDrawable(outlineDrawableIndex, this.squircleOutlineDrawable);
+
+    backgroundImageDrawManager.beforeDraw(layerDrawable);
 
     super.draw(canvas);
 
     if (backgroundDrawableIndex >= 0) layerDrawable.setDrawable(backgroundDrawableIndex, backgroundDrawable);
-    if (backgroundImageDrawableIndex >= 0) layerDrawable.setDrawable(backgroundImageDrawableIndex, backgroundImageDrawable);
     if (borderDrawableIndex >= 0) layerDrawable.setDrawable(borderDrawableIndex, borderDrawable);
     if (outlineDrawableIndex >= 0) layerDrawable.setDrawable(outlineDrawableIndex, outlineDrawable);
+
+    backgroundImageDrawManager.afterDraw(layerDrawable);
   }
 
   @OptIn(markerClass = UnstableReactNativeAPI.class)
@@ -182,10 +175,6 @@ public class FastSquircleView extends ReactViewGroup {
 
     if (this.squircleBackgroundDrawable != null) {
       this.squircleBackgroundDrawable.setCornerSmoothing(cornerSmoothing);
-    }
-
-    if (this.squircleBackgroundImageDrawable != null) {
-      this.squircleBackgroundImageDrawable.setCornerSmoothing(cornerSmoothing);
     }
 
     if (this.squircleBorderDrawable != null) {
@@ -197,6 +186,7 @@ public class FastSquircleView extends ReactViewGroup {
     }
 
     this.cssBackgroundManager.setCornerSmoothing(getBackground(), cornerSmoothing);
+    this.backgroundImageManager.setCornerSmoothing(cornerSmoothing);
 
     invalidate();
     invalidateOutline();

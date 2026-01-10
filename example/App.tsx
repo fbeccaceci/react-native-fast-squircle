@@ -67,6 +67,8 @@ const styles = StyleSheet.create({
 
     boxShadow: '10px 10px 0px 20px #000000',
 
+    experimental_backgroundImage: `linear-gradient(116.565deg, rgb(255, 215, 0), rgb(0, 0, 255), rgb(128, 0, 128), rgb(255, 0, 0), rgb(255, 165, 0), rgb(255, 255, 0), rgb(0, 128, 0), rgb(255, 192, 203), rgb(0, 255, 255), rgb(255, 0, 255))`,
+
     // outlineWidth: 4,
     // outlineOffset: 10,
     // outlineColor: 'green',
