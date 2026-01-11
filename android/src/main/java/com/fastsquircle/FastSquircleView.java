@@ -12,7 +12,6 @@ import androidx.annotation.OptIn;
 
 import com.facebook.react.common.annotations.UnstableReactNativeAPI;
 import com.facebook.react.uimanager.drawable.BackgroundDrawable;
-//import com.facebook.react.uimanager.drawable.BackgroundImageDrawable;
 import com.facebook.react.uimanager.drawable.BorderDrawable;
 import com.facebook.react.uimanager.drawable.CompositeBackgroundDrawable;
 import com.facebook.react.uimanager.drawable.OutlineDrawable;
@@ -20,7 +19,6 @@ import com.facebook.react.uimanager.drawable.OutsetBoxShadowDrawable;
 import com.facebook.react.uimanager.style.Overflow;
 import com.facebook.react.views.view.ReactViewGroup;
 import com.fastsquircle.drawables.SquircleBackgroundDrawable;
-import com.fastsquircle.drawables.SquircleBackgroundImageDrawable;
 import com.fastsquircle.drawables.SquircleBorderDrawable;
 import com.fastsquircle.drawables.SquircleOutlineDrawable;
 import com.fastsquircle.drawables.SquircleOutsetShadowDrawable;
@@ -33,7 +31,6 @@ public class FastSquircleView extends ReactViewGroup {
   private float cornerSmoothing = 0.0f;
 
   private SquircleBackgroundDrawable squircleBackgroundDrawable;
-//  private SquircleBackgroundImageDrawable squircleBackgroundImageDrawable;
   private SquircleBorderDrawable squircleBorderDrawable;
 
   private SquircleOutlineDrawable squircleOutlineDrawable;
