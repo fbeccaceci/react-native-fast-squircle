@@ -23,11 +23,8 @@ Pod::Spec.new do |s|
 
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
-    'SWIFT_COMPILATION_MODE' => 'wholemodule'
-  }
-
-  s.xcconfig = {
-    "OTHER_CFLAGS" => "$(inherited) #{version_flags}",
+    'SWIFT_COMPILATION_MODE' => 'wholemodule',
+    'OTHER_CFLAGS' => "$(inherited) #{version_flags}"
   }
 
   install_modules_dependencies(s)
