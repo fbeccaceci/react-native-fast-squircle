@@ -113,6 +113,14 @@ repositories {
   google()
 }
 
+// React Native 0.88 compiles ViewManagerDelegate without jvm-default compatibility stubs. Match it,
+// otherwise kotlinc emits a stub for the interface's Java-compat default that has the same JVM
+// signature as SplitDelegate.setProperty (a duplicate method). `-Xjvm-default=all` is accepted by
+// every Kotlin version RN has shipped with (2.2+ spells it `-jvm-default=no-compatibility`).
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+  compilerOptions.freeCompilerArgs.add("-Xjvm-default=all")
+}
+
 def kotlin_version = getExtOrDefault("kotlinVersion")
 
 dependencies {
