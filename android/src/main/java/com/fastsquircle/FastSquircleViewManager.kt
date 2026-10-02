@@ -1,5 +1,6 @@
 package com.fastsquircle
 
+import android.view.View
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.SimpleViewManager
@@ -60,12 +61,17 @@ class ViewManagerWrapper(private val baseVm: FastSquircleViewManager) :
 
 }
 
-class SplitDelegate(
-  private val baseDelegate: ViewManagerDelegate<ReactViewGroup>,
+// Generic over T : View (instead of a concrete ReactViewGroup) so the overrides erase to the same JVM
+// signatures as React Native 0.88's own BaseViewManagerDelegate. Since 0.88, ViewManagerDelegate
+// exposes Java-compat defaults under the JVM names setProperty/receiveCommand, hence the
+// ACCIDENTAL_OVERRIDE suppressions (the same ones RN uses).
+class SplitDelegate<T : View>(
+  private val baseDelegate: ViewManagerDelegate<T>,
   private val specificDelegate: ViewManagerDelegate<FastSquircleView>
-) : ViewManagerDelegate<ReactViewGroup> {
+) : ViewManagerDelegate<T> {
 
-  override fun setProperty(view: ReactViewGroup, propName: String, value: Any?) {
+  @Suppress("ACCIDENTAL_OVERRIDE")
+  override fun setProperty(view: T, propName: String, value: Any?) {
     baseDelegate.setProperty(view, propName, value)
 
     // For some reason i cannot understand handling the outlineColor in the specificDelegate causes
@@ -76,7 +82,8 @@ class SplitDelegate(
       specificDelegate.setProperty(view, propName, value)
   }
 
-  override fun receiveCommand(view: ReactViewGroup, commandName: String, args: ReadableArray) {
+  @Suppress("ACCIDENTAL_OVERRIDE")
+  override fun receiveCommand(view: T, commandName: String, args: ReadableArray) {
     baseDelegate.receiveCommand(view, commandName, args)
 
     if (view is FastSquircleView)
