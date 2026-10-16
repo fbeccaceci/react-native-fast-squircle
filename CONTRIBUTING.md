@@ -10,6 +10,11 @@ This project is a monorepo managed using [Yarn workspaces](https://yarnpkg.com/f
 
 - The library package in the root directory.
 - An example app in the `example/` directory.
+- An Expo SDK 58 example app in the `example-expo58/` directory.
+
+For Expo SDK 58, use `yarn example-expo58 android` to build and run the app.
+Use `yarn example-expo58 build:android` to build a debug APK without a device.
+See the [Expo SDK 58 example](./example-expo58/README.md) for setup and other commands.
 
 To get started with the project, run `yarn` in the root directory to install the required dependencies for each package:
 

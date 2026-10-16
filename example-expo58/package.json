@@ -1,0 +1,28 @@
+{
+  "name": "react-native-fast-squircle-example-expo58",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.ts",
+  "engines": {
+    "node": "^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0"
+  },
+  "scripts": {
+    "start": "expo start --dev-client",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "prebuild:android": "expo prebuild --platform android --no-install",
+    "build:android": "yarn prebuild:android && cd android && ./gradlew :app:assembleDebug",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "expo": "~58.0.13",
+    "expo-dev-client": "~58.0.13",
+    "react": "19.3.0",
+    "react-native": "0.88.0",
+    "react-native-fast-squircle": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "~19.3.0",
+    "typescript": "~6.0.3"
+  }
+}

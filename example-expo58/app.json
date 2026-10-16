@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "Fast Squircle Expo 58",
+    "slug": "fast-squircle-expo58",
+    "version": "1.0.0",
+    "experiments": {
+      "tsconfigPaths": false
+    },
+    "android": {
+      "package": "com.fastsquircle.expo58example"
+    },
+    "ios": {
+      "bundleIdentifier": "com.fastsquircle.expo58example"
+    }
+  }
+}

@@ -34,6 +34,7 @@
   ],
   "scripts": {
     "example": "yarn workspace react-native-fast-squircle-example",
+    "example-expo58": "yarn workspace react-native-fast-squircle-example-expo58",
     "test": "jest",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
@@ -90,7 +91,8 @@
     "react-native": "*"
   },
   "workspaces": [
-    "example"
+    "example",
+    "example-expo58"
   ],
   "packageManager": "yarn@3.6.1",
   "jest": {
