@@ -65,6 +65,8 @@ class SplitDelegate(
   private val specificDelegate: ViewManagerDelegate<FastSquircleView>
 ) : ViewManagerDelegate<ReactViewGroup> {
 
+  // React Native uses the same suppression for its Java compatibility methods.
+  @Suppress("ACCIDENTAL_OVERRIDE")
   override fun setProperty(view: ReactViewGroup, propName: String, value: Any?) {
     baseDelegate.setProperty(view, propName, value)
 
@@ -76,6 +78,7 @@ class SplitDelegate(
       specificDelegate.setProperty(view, propName, value)
   }
 
+  @Suppress("ACCIDENTAL_OVERRIDE")
   override fun receiveCommand(view: ReactViewGroup, commandName: String, args: ReadableArray) {
     baseDelegate.receiveCommand(view, commandName, args)
 
