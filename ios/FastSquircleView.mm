@@ -133,6 +133,8 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
   CALayer * _squircleBorderLayer;
   
   float _cornerSmoothing;
+
+  BOOL _forcesClippingContainer;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
@@ -376,8 +378,12 @@ static RCTBorderStyle RCTBorderStyleFromOutlineStyle(OutlineStyle outlineStyle)
 
 - (BOOL)styleWouldClipOverflowInk
 {
-  // If the overflow is hidden we foce to use a subview for rendering, that allows for better clipping preserving borders
-  return [super styleWouldClipOverflowInk] || self.currentContainerView.clipsToBounds;
+  // Once a view clips we keep using the container for good, so it never toggles while mounted
+  // toggling it reparents the children and crashes Fabric (issue #28)
+  if (_props->getClipsContentToBounds()) {
+    _forcesClippingContainer = YES;
+  }
+  return _forcesClippingContainer || [super styleWouldClipOverflowInk];
 }
 
 -(NSNumber *)toSingleValue:(CornerRadii)cornerRadii
